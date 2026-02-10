@@ -56,22 +56,22 @@ export function BookmarkManager() {
   // Show loading state while initializing
   if (!isInitialized) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-muted/40 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Setting up your bookmarks...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Setting up your bookmarks...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <header className="sticky top-0 z-10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 shadow-sm">
+    <div className="min-h-screen bg-muted/40">
+      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Bookmarks</h1>
+              <h1 className="text-2xl font-bold">Bookmarks</h1>
               <ProfileSelector
                 profiles={profiles}
                 selectedProfileId={selectedProfileId}
@@ -99,10 +99,10 @@ export function BookmarkManager() {
                 className="w-4 h-4 rounded-full"
                 style={{ backgroundColor: selectedProfile.color }}
               />
-              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+              <h2 className="text-xl font-semibold">
                 {selectedProfile.name}
               </h2>
-              <span className="text-sm text-gray-500 dark:text-gray-400">
+              <span className="text-sm text-muted-foreground">
                 {bookmarks.length} bookmark{bookmarks.length !== 1 ? 's' : ''}
               </span>
             </div>
@@ -113,7 +113,7 @@ export function BookmarkManager() {
           <BookmarkGrid bookmarks={bookmarks} />
         ) : (
           <div className="text-center py-12">
-            <p className="text-gray-500 dark:text-gray-400">Select a profile to view bookmarks</p>
+            <p className="text-muted-foreground">Select a profile to view bookmarks</p>
           </div>
         )}
       </main>

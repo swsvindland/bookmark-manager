@@ -116,7 +116,7 @@ export function BookmarkGrid({ bookmarks }: BookmarkGridProps) {
                           }}
                         />
                       ) : null}
-                      <div className={`w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded text-white text-xs flex items-center justify-center font-medium ${getFaviconUrl(bookmark) ? 'hidden' : ''}`}>
+                      <div className={`w-6 h-6 bg-primary/10 text-primary rounded text-xs flex items-center justify-center font-medium ${getFaviconUrl(bookmark) ? 'hidden' : ''}`}>
                         {bookmark.title.charAt(0).toUpperCase()}
                       </div>
                     </div>

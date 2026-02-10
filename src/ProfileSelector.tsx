@@ -122,7 +122,7 @@ export function ProfileSelector({ profiles, selectedProfileId, onProfileSelect }
             onClick={() => onProfileSelect(profile._id)}
             className={cn(
               "flex items-center gap-2 h-9 px-3",
-              selectedProfileId === profile._id && "bg-white dark:bg-gray-700 shadow-sm border"
+              selectedProfileId === profile._id && "bg-background shadow-sm border"
             )}
           >
             <div 

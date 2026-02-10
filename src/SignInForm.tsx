@@ -2,8 +2,9 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Input } from '@/components/ui/input.tsx'
-import { Button } from '@/components/ui/button.tsx'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 
 export function SignInForm() {
   const { signIn } = useAuthActions();
@@ -11,9 +12,9 @@ export function SignInForm() {
   const [submitting, setSubmitting] = useState(false);
 
   return (
-    <div className="w-full">
+    <div className="w-full space-y-4">
       <form
-        className="flex flex-col gap-form-field gap-2"
+        className="flex flex-col gap-4"
         onSubmit={(e) => {
           e.preventDefault();
           setSubmitting(true);
@@ -34,44 +35,56 @@ export function SignInForm() {
           });
         }}
       >
-        <Input
-          className="auth-input-field"
-          type="email"
-          name="email"
-          placeholder="Email"
-          required
-        />
-        <Input
-          className="auth-input-field"
-          type="password"
-          name="password"
-          placeholder="Password"
-          required
-        />
-        <Button className="auth-button" type="submit" disabled={submitting}>
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            name="email"
+            placeholder="m@example.com"
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            type="password"
+            name="password"
+            placeholder="••••••••"
+            required
+          />
+        </div>
+        <Button className="w-full" type="submit" disabled={submitting}>
           {flow === "signIn" ? "Sign in" : "Sign up"}
         </Button>
-        <div className="text-center text-sm text-secondary">
-          <span>
+        <div className="text-center text-sm">
+          <span className="text-muted-foreground">
             {flow === "signIn"
               ? "Don't have an account? "
               : "Already have an account? "}
           </span>
           <Button
+            variant="link"
             type="button"
-            className="text-primary hover:text-primary-hover hover:underline font-medium cursor-pointer"
+            className="p-0 h-auto font-medium"
             onClick={() => setFlow(flow === "signIn" ? "signUp" : "signIn")}
           >
             {flow === "signIn" ? "Sign up instead" : "Sign in instead"}
           </Button>
         </div>
       </form>
-      <div className="flex items-center justify-center my-3">
-        <hr className="my-4 grow border-gray-200" />
-        <span className="mx-4 text-secondary">or</span>
-        <hr className="my-4 grow border-gray-200" />
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-background px-2 text-muted-foreground">
+            Or continue with
+          </span>
+        </div>
       </div>
-      <Button className="auth-button" onClick={() => void signIn("anonymous")}>
+      <Button variant="outline" className="w-full" onClick={() => void signIn("anonymous")}>
         Sign in anonymously
       </Button>
     </div>

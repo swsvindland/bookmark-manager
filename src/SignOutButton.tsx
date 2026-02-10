@@ -2,6 +2,8 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useConvexAuth } from "convex/react";
 
+import { Button } from "@/components/ui/button";
+
 export function SignOutButton() {
   const { isAuthenticated } = useConvexAuth();
   const { signOut } = useAuthActions();
@@ -11,11 +13,11 @@ export function SignOutButton() {
   }
 
   return (
-    <button
-      className="px-4 py-2 rounded bg-white text-secondary border border-gray-200 font-semibold hover:bg-gray-50 hover:text-secondary-hover transition-colors shadow-sm hover:shadow"
+    <Button
+      variant="outline"
       onClick={() => void signOut()}
     >
       Sign out
-    </button>
+    </Button>
   );
 }

@@ -7,6 +7,8 @@ import { BookmarkGrid } from "./BookmarkGrid";
 import { AddBookmarkForm } from "./AddBookmarkForm";
 import { Id } from "../convex/_generated/dataModel";
 
+import { Button } from "@/components/ui/button";
+
 export function BookmarkManager() {
   const profiles = useQuery(api.profiles.list) || [];
   const defaultProfile = useQuery(api.profiles.getDefault);
@@ -77,13 +79,12 @@ export function BookmarkManager() {
               />
             </div>
             <div className="flex items-center gap-4">
-              <button
+              <Button
                 onClick={() => setShowAddForm(true)}
                 disabled={!selectedProfileId}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Add Bookmark
-              </button>
+              </Button>
               <SignOutButton />
             </div>
           </div>

@@ -2,6 +2,25 @@ import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { Id } from "../convex/_generated/dataModel";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { MoreVertical, PlusCircle, Trash2, CheckCircle2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface Profile {
   _id: Id<"profiles">;
@@ -25,7 +44,6 @@ export function ProfileSelector({ profiles, selectedProfileId, onProfileSelect }
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newProfileName, setNewProfileName] = useState("");
   const [selectedColor, setSelectedColor] = useState(PROFILE_COLORS[0]);
-  const [showDropdown, setShowDropdown] = useState(false);
 
   const createProfile = useMutation(api.profiles.create);
   const setDefaultProfile = useMutation(api.profiles.setDefault);
@@ -81,151 +99,128 @@ export function ProfileSelector({ profiles, selectedProfileId, onProfileSelect }
   if (profiles.length === 0 && !showCreateForm) {
     return (
       <div className="flex items-center gap-4">
-        <span className="text-gray-500 dark:text-gray-400">No profiles yet</span>
-        <button
+        <span className="text-muted-foreground">No profiles yet</span>
+        <Button
           onClick={() => setShowCreateForm(true)}
-          className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-colors"
+          size="sm"
         >
           Create Profile
-        </button>
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="relative">
-      <div className="flex items-center gap-2">
-        {/* Profile Tabs */}
-        <div className="flex gap-1">
-          {profiles.map((profile) => (
-            <button
-              key={profile._id}
-              onClick={() => onProfileSelect(profile._id)}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
-                selectedProfileId === profile._id
-                  ? "bg-white dark:bg-gray-700 shadow-sm border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100"
-                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700"
-              }`}
-            >
-              <div 
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: profile.color }}
-              />
-              {profile.name}
-              {profile.isDefault && (
-                <span className="text-xs bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-1 rounded">default</span>
-              )}
-            </button>
-          ))}
-        </div>
-
-        {/* Dropdown Menu */}
-        <div className="relative">
-          <button
-            onClick={() => setShowDropdown(!showDropdown)}
-            className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+    <div className="flex items-center gap-2">
+      {/* Profile Tabs */}
+      <div className="flex gap-1 overflow-x-auto pb-1 max-w-md sm:max-w-xl">
+        {profiles.map((profile) => (
+          <Button
+            key={profile._id}
+            variant={selectedProfileId === profile._id ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => onProfileSelect(profile._id)}
+            className={cn(
+              "flex items-center gap-2 h-9 px-3",
+              selectedProfileId === profile._id && "bg-white dark:bg-gray-700 shadow-sm border"
+            )}
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-            </svg>
-          </button>
-
-          {showDropdown && (
-            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10">
-              <div className="py-1">
-                <button
-                  onClick={() => {
-                    setShowCreateForm(true);
-                    setShowDropdown(false);
-                  }}
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  Create New Profile
-                </button>
-                {selectedProfileId && (
-                  <>
-                    <button
-                      onClick={() => {
-                        handleSetDefault(selectedProfileId);
-                        setShowDropdown(false);
-                      }}
-                      className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      Set as Default
-                    </button>
-                    <button
-                      onClick={() => {
-                        handleRemoveProfile(selectedProfileId);
-                        setShowDropdown(false);
-                      }}
-                      className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
-                    >
-                      Delete Profile
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
+            <div 
+              className="w-3 h-3 rounded-full flex-shrink-0"
+              style={{ backgroundColor: profile.color }}
+            />
+            <span className="truncate max-w-[100px]">{profile.name}</span>
+            {profile.isDefault && (
+              <span className="text-[10px] bg-muted px-1 rounded uppercase font-bold text-muted-foreground">default</span>
+            )}
+          </Button>
+        ))}
       </div>
 
-      {/* Create Profile Form */}
-      {showCreateForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
-            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Create New Profile</h3>
-            <form onSubmit={handleCreateProfile}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Profile Name
-                </label>
-                <input
-                  type="text"
-                  value={newProfileName}
-                  onChange={(e) => setNewProfileName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  placeholder="e.g., Work, Personal, Gaming"
-                  required
-                />
+      {/* Dropdown Menu */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <MoreVertical className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => setShowCreateForm(true)}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            <span>Create New Profile</span>
+          </DropdownMenuItem>
+          {selectedProfileId && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => handleSetDefault(selectedProfileId)}>
+                <CheckCircle2 className="mr-2 h-4 w-4" />
+                <span>Set as Default</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => handleRemoveProfile(selectedProfileId)}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                <span>Delete Profile</span>
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* Create Profile Form Dialog */}
+      <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create New Profile</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleCreateProfile} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="profile-name">Profile Name</Label>
+              <Input
+                id="profile-name"
+                type="text"
+                value={newProfileName}
+                onChange={(e) => setNewProfileName(e.target.value)}
+                placeholder="e.g., Work, Personal, Gaming"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Color</Label>
+              <div className="flex flex-wrap gap-2">
+                {PROFILE_COLORS.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    onClick={() => setSelectedColor(color)}
+                    className={cn(
+                      "w-8 h-8 rounded-full border-2 transition-all",
+                      selectedColor === color 
+                        ? "border-primary scale-110 shadow-sm" 
+                        : "border-transparent hover:scale-105"
+                    )}
+                    style={{ backgroundColor: color }}
+                  />
+                ))}
               </div>
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Color
-                </label>
-                <div className="flex gap-2">
-                  {PROFILE_COLORS.map((color) => (
-                    <button
-                      key={color}
-                      type="button"
-                      onClick={() => setSelectedColor(color)}
-                      className={`w-8 h-8 rounded-full border-2 ${
-                        selectedColor === color ? "border-gray-400 dark:border-gray-500" : "border-gray-200 dark:border-gray-600"
-                      }`}
-                      style={{ backgroundColor: color }}
-                    />
-                  ))}
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <button
-                  type="submit"
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Create Profile
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowCreateForm(false)}
-                  className="px-4 py-2 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+            </div>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button type="submit" className="flex-1">
+                Create Profile
+              </Button>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setShowCreateForm(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

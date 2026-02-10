@@ -14,19 +14,18 @@ import {
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-muted/40">
+    <div className="min-h-screen">
       <Authenticated>
         <BookmarkManager />
       </Authenticated>
       <Unauthenticated>
         <div className="min-h-screen flex flex-col">
-          <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm h-16 flex justify-between items-center border-b px-4">
-            <h2 className="text-xl font-bold tracking-tight">Bookmark Manager</h2>
-          </header>
           <main className="flex-1 flex items-center justify-center p-4 sm:p-8">
             <Card className="w-full max-w-md">
               <CardHeader className="text-center space-y-1">
-                <CardTitle className="text-3xl font-bold">Welcome back</CardTitle>
+                <CardTitle className="text-3xl font-bold">
+                  <h1>Bookmark Manager</h1>
+                </CardTitle>
                 <CardDescription>
                   Enter your credentials to access your bookmarks
                 </CardDescription>

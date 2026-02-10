@@ -56,7 +56,7 @@ export function BookmarkManager() {
   // Show loading state while initializing
   if (!isInitialized) {
     return (
-      <div className="min-h-screen bg-muted/40 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">Setting up your bookmarks...</p>
@@ -66,8 +66,8 @@ export function BookmarkManager() {
   }
 
   return (
-    <div className="min-h-screen bg-muted/40">
-      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b shadow-sm">
+    <div className="min-h-screen">
+      <header className="sticky top-0 z-10 border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">

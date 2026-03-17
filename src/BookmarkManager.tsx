@@ -64,11 +64,11 @@ export function BookmarkManager() {
 
     return (
         <div className="min-h-screen">
-            <header className="sticky top-0 z-10 border-b shadow-sm">
+            <header className="sticky top-0 z-10 border-b">
                 <div className="mx-auto max-w-7xl px-4 py-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-6">
-                            <h1 className="text-2xl font-bold">Bookmarks</h1>
+                            <h1 className="text-2xl font-bold tracking-widest">Bookmarks</h1>
                             <ProfileSelector
                                 profiles={profiles}
                                 selectedProfileId={selectedProfileId}
@@ -89,8 +89,8 @@ export function BookmarkManager() {
                 {selectedProfile && (
                     <div className="mb-6">
                         <div className="flex items-center gap-3">
-                            <div className="h-4 w-4 rounded-full" style={{ backgroundColor: selectedProfile.color }} />
-                            <h2 className="text-xl font-semibold">{selectedProfile.name}</h2>
+                            <div className="h-3 w-3" style={{ backgroundColor: selectedProfile.color, boxShadow: `0 0 8px ${selectedProfile.color}` }} />
+                            <h2 className="text-xl font-semibold tracking-widest">{selectedProfile.name}</h2>
                             <span className="text-muted-foreground text-sm">
                                 {bookmarks.length} bookmark{bookmarks.length !== 1 ? 's' : ''}
                             </span>

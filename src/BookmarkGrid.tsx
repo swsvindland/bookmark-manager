@@ -98,7 +98,7 @@ export function BookmarkGrid({ bookmarks }: BookmarkGridProps) {
                 {bookmarks.map((bookmark) => (
                     <ContextMenu key={bookmark._id}>
                         <ContextMenuTrigger asChild>
-                            <Card className="group hover:border-primary/50 relative h-full overflow-hidden transition-all duration-200">
+                            <Card className="card-psycho group hover:border-primary/50 relative h-full overflow-hidden transition-all duration-200 hover:shadow-md">
                                 <a
                                     href={bookmark.url}
                                     target="_blank"
@@ -106,7 +106,7 @@ export function BookmarkGrid({ bookmarks }: BookmarkGridProps) {
                                     className="block h-full p-4"
                                 >
                                     <div className="mb-3 flex items-start gap-3">
-                                        <div className="bg-muted flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg">
+                                        <div className="bg-muted flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-none border border-border">
                                             {getFaviconUrl(bookmark) ? (
                                                 <img
                                                     src={getFaviconUrl(bookmark)!}

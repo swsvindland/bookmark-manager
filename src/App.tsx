@@ -8,19 +8,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 export default function App() {
     return (
-        <div className="min-h-screen">
+        <div className="min-h-screen bg-background">
             <Authenticated>
                 <BookmarkManager />
             </Authenticated>
             <Unauthenticated>
                 <div className="flex min-h-screen flex-col">
-                    <main className="flex flex-1 items-center justify-center p-4 sm:p-8">
-                        <Card className="w-full max-w-md">
+                    <main className="flex flex-1 items-center justify-center p-4 sm:p-8 relative">
+                        <Card className="card-psycho w-full max-w-md border-border shadow-lg">
                             <CardHeader className="space-y-1 text-center">
-                                <CardTitle className="text-3xl font-bold">
+                                <CardTitle className="text-3xl font-bold tracking-widest">
                                     <h1>Bookmark Manager</h1>
                                 </CardTitle>
-                                <CardDescription>Enter your credentials to access your bookmarks</CardDescription>
+                                <CardDescription className="text-muted-foreground tracking-wider text-xs uppercase">Enter your credentials to access your bookmarks</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <SignInForm />

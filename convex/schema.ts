@@ -12,6 +12,15 @@ const applicationTables = {
         .index('by_user', ['userId'])
         .index('by_user_default', ['userId', 'isDefault']),
 
+    folders: defineTable({
+        name: v.string(),
+        profileId: v.id('profiles'),
+        userId: v.id('users'),
+        createdAt: v.number(),
+    })
+        .index('by_profile', ['profileId'])
+        .index('by_user', ['userId']),
+
     bookmarks: defineTable({
         url: v.string(),
         title: v.string(),
@@ -20,10 +29,12 @@ const applicationTables = {
         profileId: v.id('profiles'),
         userId: v.id('users'),
         addedAt: v.number(),
+        folderId: v.optional(v.id('folders')),
     })
         .index('by_profile', ['profileId'])
         .index('by_user', ['userId'])
-        .index('by_profile_added', ['profileId', 'addedAt']),
+        .index('by_profile_added', ['profileId', 'addedAt'])
+        .index('by_folder', ['folderId']),
 };
 
 export default defineSchema({

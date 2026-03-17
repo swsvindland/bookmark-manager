@@ -9,10 +9,11 @@ import { Label } from '@/components/ui/label';
 
 interface AddBookmarkFormProps {
     profileId: Id<'profiles'>;
+    folderId?: Id<'folders'>;
     onClose: () => void;
 }
 
-export function AddBookmarkForm({ profileId, onClose }: AddBookmarkFormProps) {
+export function AddBookmarkForm({ profileId, folderId, onClose }: AddBookmarkFormProps) {
     const [url, setUrl] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const addBookmark = useAction(api.bookmarks.add);
@@ -31,6 +32,7 @@ export function AddBookmarkForm({ profileId, onClose }: AddBookmarkFormProps) {
             await addBookmark({
                 url: formattedUrl,
                 profileId,
+                ...(folderId ? { folderId } : {}),
             });
 
             setUrl('');
@@ -47,7 +49,7 @@ export function AddBookmarkForm({ profileId, onClose }: AddBookmarkFormProps) {
         <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Add New Bookmark</DialogTitle>
+                    <DialogTitle>{folderId ? 'Add Bookmark to Folder' : 'Add New Bookmark'}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">

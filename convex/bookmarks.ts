@@ -32,6 +32,7 @@ export const add = action({
     args: {
         url: v.string(),
         profileId: v.id('profiles'),
+        folderId: v.optional(v.id('folders')),
     },
     handler: async (ctx, args): Promise<Id<'bookmarks'>> => {
         // Fetch metadata for the URL
@@ -83,6 +84,7 @@ export const add = action({
             description,
             favicon,
             profileId: args.profileId,
+            folderId: args.folderId,
         });
     },
 });
@@ -94,6 +96,7 @@ export const create = mutation({
         description: v.optional(v.string()),
         favicon: v.optional(v.string()),
         profileId: v.id('profiles'),
+        folderId: v.optional(v.id('folders')),
     },
     handler: async (ctx, args) => {
         const userId = await getAuthUserId(ctx);
@@ -115,6 +118,7 @@ export const create = mutation({
             profileId: args.profileId,
             userId,
             addedAt: Date.now(),
+            folderId: args.folderId,
         });
     },
 });
@@ -143,6 +147,7 @@ export const update = mutation({
         bookmarkId: v.id('bookmarks'),
         title: v.optional(v.string()),
         description: v.optional(v.string()),
+        folderId: v.optional(v.union(v.id('folders'), v.null())),
     },
     handler: async (ctx, args) => {
         const userId = await getAuthUserId(ctx);
@@ -158,6 +163,7 @@ export const update = mutation({
         const updates: any = {};
         if (args.title !== undefined) updates.title = args.title;
         if (args.description !== undefined) updates.description = args.description;
+        if (args.folderId !== undefined) updates.folderId = args.folderId;
 
         await ctx.db.patch(args.bookmarkId, updates);
     },

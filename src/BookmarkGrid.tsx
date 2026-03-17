@@ -3,15 +3,19 @@ import { useMutation } from 'convex/react';
 import { api } from '../convex/_generated/api';
 import { Id } from '../convex/_generated/dataModel';
 import { EditBookmarkModal } from './EditBookmarkModal';
+import { FolderCard } from './FolderCard';
 import {
     ContextMenu,
     ContextMenuContent,
     ContextMenuItem,
     ContextMenuTrigger,
     ContextMenuSeparator,
+    ContextMenuSub,
+    ContextMenuSubTrigger,
+    ContextMenuSubContent,
 } from '@/components/ui/context-menu';
 import { Card } from '@/components/ui/card';
-import { Pencil, Copy, Trash2, MoreVertical, ExternalLink } from 'lucide-react';
+import { Pencil, Copy, Trash2, MoreVertical, ExternalLink, FolderInput, FolderMinus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -19,6 +23,9 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
     DropdownMenuSeparator,
+    DropdownMenuSub,
+    DropdownMenuSubTrigger,
+    DropdownMenuSubContent,
 } from '@/components/ui/dropdown-menu';
 
 interface Bookmark {
@@ -28,16 +35,25 @@ interface Bookmark {
     description?: string;
     favicon?: string;
     addedAt: number;
+    folderId?: Id<'folders'>;
+}
+
+interface Folder {
+    _id: Id<'folders'>;
+    name: string;
 }
 
 interface BookmarkGridProps {
     bookmarks: Bookmark[];
+    folders: Folder[];
+    profileId: Id<'profiles'>;
 }
 
-export function BookmarkGrid({ bookmarks }: BookmarkGridProps) {
+export function BookmarkGrid({ bookmarks, folders, profileId }: BookmarkGridProps) {
     const [editingBookmark, setEditingBookmark] = useState<Bookmark | null>(null);
 
     const removeBookmark = useMutation(api.bookmarks.remove);
+    const updateBookmark = useMutation(api.bookmarks.update);
 
     const handleRemoveBookmark = async (bookmarkId: Id<'bookmarks'>) => {
         if (confirm('Are you sure you want to remove this bookmark?')) {
@@ -49,14 +65,16 @@ export function BookmarkGrid({ bookmarks }: BookmarkGridProps) {
         }
     };
 
-    const handleEditBookmark = (bookmark: Bookmark) => {
-        setEditingBookmark(bookmark);
+    const handleMoveToFolder = async (bookmarkId: Id<'bookmarks'>, folderId: Id<'folders'> | null) => {
+        try {
+            await updateBookmark({ bookmarkId, folderId: folderId ?? null });
+        } catch (error) {
+            console.error('Failed to move bookmark:', error);
+        }
     };
 
     const getFaviconUrl = (bookmark: Bookmark) => {
-        if (bookmark.favicon) {
-            return bookmark.favicon;
-        }
+        if (bookmark.favicon) return bookmark.favicon;
         try {
             const url = new URL(bookmark.url);
             return `${url.protocol}//${url.host}/favicon.ico`;
@@ -73,7 +91,14 @@ export function BookmarkGrid({ bookmarks }: BookmarkGridProps) {
         }
     };
 
-    if (bookmarks.length === 0) {
+    // Split bookmarks into foldered and unfoldered
+    const folderedBookmarks = bookmarks.filter((b) => b.folderId);
+    const unfolderedBookmarks = bookmarks.filter((b) => !b.folderId);
+
+    const bookmarksByFolder = (folderId: Id<'folders'>) =>
+        folderedBookmarks.filter((b) => b.folderId === folderId);
+
+    if (bookmarks.length === 0 && folders.length === 0) {
         return (
             <div className="py-12 text-center">
                 <div className="text-muted-foreground mb-4">
@@ -92,133 +117,198 @@ export function BookmarkGrid({ bookmarks }: BookmarkGridProps) {
         );
     }
 
+    const renderBookmarkCard = (bookmark: Bookmark) => (
+        <ContextMenu key={bookmark._id}>
+            <ContextMenuTrigger asChild>
+                <Card className="card-psycho group hover:border-primary/50 relative h-full overflow-hidden transition-all duration-200 hover:shadow-md">
+                    <a
+                        href={bookmark.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block h-full p-4"
+                    >
+                        <div className="mb-3 flex items-start gap-3">
+                            <div className="bg-muted flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-none border border-border">
+                                {getFaviconUrl(bookmark) ? (
+                                    <img
+                                        src={getFaviconUrl(bookmark)!}
+                                        alt=""
+                                        className="h-6 w-6"
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.style.display = 'none';
+                                            target.nextElementSibling?.classList.remove('hidden');
+                                        }}
+                                    />
+                                ) : null}
+                                <div
+                                    className={`bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded text-xs font-medium ${getFaviconUrl(bookmark) ? 'hidden' : ''}`}
+                                >
+                                    {bookmark.title.charAt(0).toUpperCase()}
+                                </div>
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <h3 className="line-clamp-2 text-sm leading-tight font-medium">
+                                    {bookmark.title}
+                                </h3>
+                                <p className="text-muted-foreground mt-1 text-xs">
+                                    {getDomain(bookmark.url)}
+                                </p>
+                            </div>
+                        </div>
+                        {bookmark.description && (
+                            <p className="text-muted-foreground line-clamp-2 text-xs leading-relaxed">
+                                {bookmark.description}
+                            </p>
+                        )}
+                    </a>
+
+                    {/* Quick Actions */}
+                    <div className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="bg-background/80 h-8 w-8 border shadow-sm backdrop-blur-sm"
+                                >
+                                    <MoreVertical className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => setEditingBookmark(bookmark)}>
+                                    <Pencil className="mr-2 h-4 w-4" />
+                                    <span>Edit</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => navigator.clipboard.writeText(bookmark.url)}>
+                                    <Copy className="mr-2 h-4 w-4" />
+                                    <span>Copy URL</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                    <a href={bookmark.url} target="_blank" rel="noopener noreferrer" className="flex w-full items-center">
+                                        <ExternalLink className="mr-2 h-4 w-4" />
+                                        <span>Open link</span>
+                                    </a>
+                                </DropdownMenuItem>
+                                {folders.length > 0 && (
+                                    <>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuSub>
+                                            <DropdownMenuSubTrigger>
+                                                <FolderInput className="mr-2 h-4 w-4" />
+                                                <span>Move to folder</span>
+                                            </DropdownMenuSubTrigger>
+                                            <DropdownMenuSubContent>
+                                                {folders.map((folder) => (
+                                                    <DropdownMenuItem
+                                                        key={folder._id}
+                                                        onClick={() => handleMoveToFolder(bookmark._id, folder._id)}
+                                                        disabled={bookmark.folderId === folder._id}
+                                                    >
+                                                        {folder.name}
+                                                    </DropdownMenuItem>
+                                                ))}
+                                                {bookmark.folderId && (
+                                                    <>
+                                                        <DropdownMenuSeparator />
+                                                        <DropdownMenuItem onClick={() => handleMoveToFolder(bookmark._id, null)}>
+                                                            <FolderMinus className="mr-2 h-4 w-4" />
+                                                            <span>Remove from folder</span>
+                                                        </DropdownMenuItem>
+                                                    </>
+                                                )}
+                                            </DropdownMenuSubContent>
+                                        </DropdownMenuSub>
+                                    </>
+                                )}
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                    onClick={() => handleRemoveBookmark(bookmark._id)}
+                                    className="text-destructive focus:text-destructive"
+                                >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    <span>Delete</span>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                </Card>
+            </ContextMenuTrigger>
+            <ContextMenuContent className="w-48">
+                <ContextMenuItem onClick={() => setEditingBookmark(bookmark)}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    <span>Edit</span>
+                </ContextMenuItem>
+                <ContextMenuItem onClick={() => navigator.clipboard.writeText(bookmark.url)}>
+                    <Copy className="mr-2 h-4 w-4" />
+                    <span>Copy URL</span>
+                </ContextMenuItem>
+                <ContextMenuItem asChild>
+                    <a href={bookmark.url} target="_blank" rel="noopener noreferrer" className="flex w-full items-center">
+                        <ExternalLink className="mr-2 h-4 w-4" />
+                        <span>Open link</span>
+                    </a>
+                </ContextMenuItem>
+                {folders.length > 0 && (
+                    <>
+                        <ContextMenuSeparator />
+                        <ContextMenuSub>
+                            <ContextMenuSubTrigger>
+                                <FolderInput className="mr-2 h-4 w-4" />
+                                <span>Move to folder</span>
+                            </ContextMenuSubTrigger>
+                            <ContextMenuSubContent>
+                                {folders.map((folder) => (
+                                    <ContextMenuItem
+                                        key={folder._id}
+                                        onClick={() => handleMoveToFolder(bookmark._id, folder._id)}
+                                        disabled={bookmark.folderId === folder._id}
+                                    >
+                                        {folder.name}
+                                    </ContextMenuItem>
+                                ))}
+                                {bookmark.folderId && (
+                                    <>
+                                        <ContextMenuSeparator />
+                                        <ContextMenuItem onClick={() => handleMoveToFolder(bookmark._id, null)}>
+                                            <FolderMinus className="mr-2 h-4 w-4" />
+                                            <span>Remove from folder</span>
+                                        </ContextMenuItem>
+                                    </>
+                                )}
+                            </ContextMenuSubContent>
+                        </ContextMenuSub>
+                    </>
+                )}
+                <ContextMenuSeparator />
+                <ContextMenuItem
+                    onClick={() => handleRemoveBookmark(bookmark._id)}
+                    className="text-destructive focus:text-destructive"
+                >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    <span>Delete</span>
+                </ContextMenuItem>
+            </ContextMenuContent>
+        </ContextMenu>
+    );
+
     return (
         <>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                {bookmarks.map((bookmark) => (
-                    <ContextMenu key={bookmark._id}>
-                        <ContextMenuTrigger asChild>
-                            <Card className="card-psycho group hover:border-primary/50 relative h-full overflow-hidden transition-all duration-200 hover:shadow-md">
-                                <a
-                                    href={bookmark.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="block h-full p-4"
-                                >
-                                    <div className="mb-3 flex items-start gap-3">
-                                        <div className="bg-muted flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-none border border-border">
-                                            {getFaviconUrl(bookmark) ? (
-                                                <img
-                                                    src={getFaviconUrl(bookmark)!}
-                                                    alt=""
-                                                    className="h-6 w-6"
-                                                    onError={(e) => {
-                                                        const target = e.target as HTMLImageElement;
-                                                        target.style.display = 'none';
-                                                        target.nextElementSibling?.classList.remove('hidden');
-                                                    }}
-                                                />
-                                            ) : null}
-                                            <div
-                                                className={`bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded text-xs font-medium ${getFaviconUrl(bookmark) ? 'hidden' : ''}`}
-                                            >
-                                                {bookmark.title.charAt(0).toUpperCase()}
-                                            </div>
-                                        </div>
-                                        <div className="min-w-0 flex-1">
-                                            <h3 className="line-clamp-2 text-sm leading-tight font-medium">
-                                                {bookmark.title}
-                                            </h3>
-                                            <p className="text-muted-foreground mt-1 text-xs">
-                                                {getDomain(bookmark.url)}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    {bookmark.description && (
-                                        <p className="text-muted-foreground line-clamp-2 text-xs leading-relaxed">
-                                            {bookmark.description}
-                                        </p>
-                                    )}
-                                </a>
-
-                                {/* Quick Actions */}
-                                <div className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="bg-background/80 h-8 w-8 border shadow-sm backdrop-blur-sm"
-                                            >
-                                                <MoreVertical className="h-4 w-4" />
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                            <DropdownMenuItem onClick={() => handleEditBookmark(bookmark)}>
-                                                <Pencil className="mr-2 h-4 w-4" />
-                                                <span>Edit</span>
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem
-                                                onClick={() => navigator.clipboard.writeText(bookmark.url)}
-                                            >
-                                                <Copy className="mr-2 h-4 w-4" />
-                                                <span>Copy URL</span>
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem asChild>
-                                                <a
-                                                    href={bookmark.url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex w-full items-center"
-                                                >
-                                                    <ExternalLink className="mr-2 h-4 w-4" />
-                                                    <span>Open link</span>
-                                                </a>
-                                            </DropdownMenuItem>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuItem
-                                                onClick={() => handleRemoveBookmark(bookmark._id)}
-                                                className="text-destructive focus:text-destructive"
-                                            >
-                                                <Trash2 className="mr-2 h-4 w-4" />
-                                                <span>Delete</span>
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </div>
-                            </Card>
-                        </ContextMenuTrigger>
-                        <ContextMenuContent className="w-48">
-                            <ContextMenuItem onClick={() => handleEditBookmark(bookmark)}>
-                                <Pencil className="mr-2 h-4 w-4" />
-                                <span>Edit</span>
-                            </ContextMenuItem>
-                            <ContextMenuItem onClick={() => navigator.clipboard.writeText(bookmark.url)}>
-                                <Copy className="mr-2 h-4 w-4" />
-                                <span>Copy URL</span>
-                            </ContextMenuItem>
-                            <ContextMenuItem asChild>
-                                <a
-                                    href={bookmark.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex w-full items-center"
-                                >
-                                    <ExternalLink className="mr-2 h-4 w-4" />
-                                    <span>Open link</span>
-                                </a>
-                            </ContextMenuItem>
-                            <ContextMenuSeparator />
-                            <ContextMenuItem
-                                onClick={() => handleRemoveBookmark(bookmark._id)}
-                                className="text-destructive focus:text-destructive"
-                            >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                <span>Delete</span>
-                            </ContextMenuItem>
-                        </ContextMenuContent>
-                    </ContextMenu>
+                {/* Folder cards first */}
+                {folders.map((folder) => (
+                    <FolderCard
+                        key={folder._id}
+                        folderId={folder._id}
+                        name={folder.name}
+                        bookmarks={bookmarksByFolder(folder._id)}
+                        profileId={profileId}
+                        onRemoveBookmark={(bookmarkId) => handleMoveToFolder(bookmarkId, null)}
+                    />
                 ))}
+
+                {/* Unfoldered bookmarks */}
+                {unfolderedBookmarks.map((bookmark) => renderBookmarkCard(bookmark))}
             </div>
 
             {editingBookmark && (

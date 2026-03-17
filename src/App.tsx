@@ -1,33 +1,41 @@
-import { Authenticated, Unauthenticated, useQuery } from 'convex/react';
-import { api } from '../convex/_generated/api';
+import { Authenticated, Unauthenticated } from 'convex/react';
+import { useState } from 'react';
 import { SignInForm } from './SignInForm';
-import { SignOutButton } from './SignOutButton';
 import { Toaster } from 'sonner';
 import { BookmarkManager } from './BookmarkManager';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { MarketingPage } from './MarketingPage';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 
 export default function App() {
+    const [showLogin, setShowLogin] = useState(false);
+
     return (
         <div className="min-h-screen bg-background">
             <Authenticated>
                 <BookmarkManager />
             </Authenticated>
             <Unauthenticated>
-                <div className="flex min-h-screen flex-col">
-                    <main className="flex flex-1 items-center justify-center p-4 sm:p-8 relative">
-                        <Card className="card-psycho w-full max-w-md border-border shadow-lg">
-                            <CardHeader className="space-y-1 text-center">
-                                <CardTitle className="text-3xl font-bold tracking-widest">
-                                    <h1>Bookmark Manager</h1>
-                                </CardTitle>
-                                <CardDescription className="text-muted-foreground tracking-wider text-xs uppercase">Enter your credentials to access your bookmarks</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <SignInForm />
-                            </CardContent>
-                        </Card>
-                    </main>
-                </div>
+                <MarketingPage onLoginClick={() => setShowLogin(true)} />
+
+                <Dialog open={showLogin} onOpenChange={setShowLogin}>
+                    <DialogContent className="sm:max-w-md">
+                        <DialogHeader className="space-y-1 text-center">
+                            <DialogTitle className="text-3xl font-bold tracking-widest">
+                                Bookmark Manager
+                            </DialogTitle>
+                            <DialogDescription className="text-muted-foreground text-xs uppercase tracking-wider">
+                                Enter your credentials to access your bookmarks
+                            </DialogDescription>
+                        </DialogHeader>
+                        <SignInForm />
+                    </DialogContent>
+                </Dialog>
             </Unauthenticated>
             <Toaster theme="system" />
         </div>

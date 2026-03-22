@@ -1,318 +1,335 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-    /* Psycho-Pass: clean white/blue light mode */
-    --background: #f0f4ff;
-    --foreground: #0a1628;
-    --card: #ffffff;
-    --card-foreground: #0a1628;
-    --popover: #ffffff;
-    --popover-foreground: #0a1628;
-    --primary: #0066cc;
-    --primary-foreground: #ffffff;
-    --secondary: #ddeeff;
-    --secondary-foreground: #003380;
-    --muted: #e8f0ff;
-    --muted-foreground: #4a6080;
-    --accent: #00aaff;
-    --accent-foreground: #ffffff;
-    --destructive: #cc2200;
-    --destructive-foreground: #ffffff;
-    --border: #99ccff;
-    --input: #cce0ff;
-    --ring: #0099ff;
-    --chart-1: #0066cc;
-    --chart-2: #0099ff;
-    --chart-3: #00ccff;
-    --chart-4: #003380;
-    --chart-5: #00aaff;
-    --sidebar: #e0ecff;
-    --sidebar-foreground: #0a1628;
-    --sidebar-primary: #0066cc;
-    --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #ddeeff;
-    --sidebar-accent-foreground: #003380;
-    --sidebar-border: #99ccff;
-    --sidebar-ring: #0099ff;
-    --font-sans: 'Inter', sans-serif;
-    --font-serif: 'Source Serif 4', serif;
-    --font-mono: 'JetBrains Mono', monospace;
-    --radius: 0.125rem;
-    --shadow-x: 0;
-    --shadow-y: 0;
-    --shadow-blur: 12px;
-    --shadow-spread: 0px;
-    --shadow-opacity: 0.25;
-    --shadow-color: oklch(0.5 0.2 220);
-    --shadow-2xs: 0 0 8px 0px rgba(0, 153, 255, 0.1);
-    --shadow-xs: 0 0 8px 0px rgba(0, 153, 255, 0.15);
-    --shadow-sm: 0 0 12px 0px rgba(0, 153, 255, 0.2), 0 1px 2px -1px rgba(0, 102, 204, 0.1);
-    --shadow: 0 0 16px 0px rgba(0, 153, 255, 0.2), 0 2px 4px -1px rgba(0, 102, 204, 0.1);
-    --shadow-md: 0 0 20px 0px rgba(0, 153, 255, 0.25), 0 4px 6px -1px rgba(0, 102, 204, 0.15);
-    --shadow-lg: 0 0 28px 0px rgba(0, 153, 255, 0.3), 0 8px 12px -2px rgba(0, 102, 204, 0.2);
-    --shadow-xl: 0 0 40px 0px rgba(0, 153, 255, 0.35), 0 12px 20px -4px rgba(0, 102, 204, 0.25);
-    --shadow-2xl: 0 0 60px 0px rgba(0, 153, 255, 0.4);
-    --tracking-normal: 0.02em;
-    --spacing: 0.25rem;
+  /* Psycho-Pass: clean white/blue light mode */
+  --background: #f0f4ff;
+  --foreground: #0a1628;
+  --card: #ffffff;
+  --card-foreground: #0a1628;
+  --popover: #ffffff;
+  --popover-foreground: #0a1628;
+  --primary: #0066cc;
+  --primary-foreground: #ffffff;
+  --secondary: #ddeeff;
+  --secondary-foreground: #003380;
+  --muted: #e8f0ff;
+  --muted-foreground: #4a6080;
+  --accent: #00aaff;
+  --accent-foreground: #ffffff;
+  --destructive: #cc2200;
+  --destructive-foreground: #ffffff;
+  --border: #99ccff;
+  --input: #cce0ff;
+  --ring: #0099ff;
+  --chart-1: #0066cc;
+  --chart-2: #0099ff;
+  --chart-3: #00ccff;
+  --chart-4: #003380;
+  --chart-5: #00aaff;
+  --sidebar: #e0ecff;
+  --sidebar-foreground: #0a1628;
+  --sidebar-primary: #0066cc;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #ddeeff;
+  --sidebar-accent-foreground: #003380;
+  --sidebar-border: #99ccff;
+  --sidebar-ring: #0099ff;
+  --font-sans: "Share Tech Mono", monospace;
+  --font-serif: "Share Tech Mono", monospace;
+  --font-mono: "Share Tech Mono", monospace;
+  --radius: 0.125rem;
+  --shadow-x: 0;
+  --shadow-y: 0;
+  --shadow-blur: 12px;
+  --shadow-spread: 0px;
+  --shadow-opacity: 0.25;
+  --shadow-color: oklch(0.5 0.2 220);
+  --shadow-2xs: 0 0 8px 0px rgba(0, 153, 255, 0.1);
+  --shadow-xs: 0 0 8px 0px rgba(0, 153, 255, 0.15);
+  --shadow-sm: 0 0 12px 0px rgba(0, 153, 255, 0.2), 0 1px 2px -1px rgba(0, 102, 204, 0.1);
+  --shadow: 0 0 16px 0px rgba(0, 153, 255, 0.2), 0 2px 4px -1px rgba(0, 102, 204, 0.1);
+  --shadow-md: 0 0 20px 0px rgba(0, 153, 255, 0.25), 0 4px 6px -1px rgba(0, 102, 204, 0.15);
+  --shadow-lg: 0 0 28px 0px rgba(0, 153, 255, 0.3), 0 8px 12px -2px rgba(0, 102, 204, 0.2);
+  --shadow-xl: 0 0 40px 0px rgba(0, 153, 255, 0.35), 0 12px 20px -4px rgba(0, 102, 204, 0.25);
+  --shadow-2xl: 0 0 60px 0px rgba(0, 153, 255, 0.4);
+  --tracking-normal: 0.02em;
+  --spacing: 0.25rem;
 }
 
 .dark {
-    /* Psycho-Pass: deep navy dark mode with cyan glow */
-    --background: #020c1b;
-    --foreground: #cce8ff;
-    --card: #041428;
-    --card-foreground: #cce8ff;
-    --popover: #041428;
-    --popover-foreground: #cce8ff;
-    --primary: #00aaff;
-    --primary-foreground: #000d1a;
-    --secondary: #071e38;
-    --secondary-foreground: #88ccff;
-    --muted: #051020;
-    --muted-foreground: #5588aa;
-    --accent: #00ccff;
-    --accent-foreground: #000d1a;
-    --destructive: #ff3300;
-    --destructive-foreground: #ffffff;
-    --border: #0a3a5c;
-    --input: #071e38;
-    --ring: #00aaff;
-    --chart-1: #00ccff;
-    --chart-2: #00aaff;
-    --chart-3: #0088dd;
-    --chart-4: #0066bb;
-    --chart-5: #004499;
-    --sidebar: #020c1b;
-    --sidebar-foreground: #cce8ff;
-    --sidebar-primary: #00aaff;
-    --sidebar-primary-foreground: #000d1a;
-    --sidebar-accent: #071e38;
-    --sidebar-accent-foreground: #88ccff;
-    --sidebar-border: #0a3a5c;
-    --sidebar-ring: #00aaff;
-    --font-sans: 'Inter', sans-serif;
-    --font-serif: 'Source Serif 4', serif;
-    --font-mono: 'JetBrains Mono', monospace;
-    --radius: 0.125rem;
-    --shadow-x: 0;
-    --shadow-y: 0;
-    --shadow-blur: 16px;
-    --shadow-spread: 0px;
-    --shadow-opacity: 0.4;
-    --shadow-color: oklch(0.6 0.25 220);
-    --shadow-2xs: 0 0 8px 0px rgba(0, 170, 255, 0.15);
-    --shadow-xs: 0 0 10px 0px rgba(0, 170, 255, 0.2);
-    --shadow-sm: 0 0 14px 0px rgba(0, 170, 255, 0.3), 0 1px 2px -1px rgba(0, 204, 255, 0.15);
-    --shadow: 0 0 20px 0px rgba(0, 170, 255, 0.35), 0 2px 4px -1px rgba(0, 204, 255, 0.2);
-    --shadow-md: 0 0 28px 0px rgba(0, 170, 255, 0.4), 0 4px 8px -2px rgba(0, 204, 255, 0.25);
-    --shadow-lg: 0 0 40px 0px rgba(0, 170, 255, 0.45), 0 8px 16px -4px rgba(0, 204, 255, 0.3);
-    --shadow-xl: 0 0 56px 0px rgba(0, 170, 255, 0.5), 0 12px 24px -6px rgba(0, 204, 255, 0.35);
-    --shadow-2xl: 0 0 80px 0px rgba(0, 170, 255, 0.6);
+  /* Psycho-Pass: deep navy dark mode with cyan glow */
+  --background: #020c1b;
+  --foreground: #cce8ff;
+  --card: #041428;
+  --card-foreground: #cce8ff;
+  --popover: #041428;
+  --popover-foreground: #cce8ff;
+  --primary: #00aaff;
+  --primary-foreground: #000d1a;
+  --secondary: #071e38;
+  --secondary-foreground: #88ccff;
+  --muted: #051020;
+  --muted-foreground: #5588aa;
+  --accent: #00ccff;
+  --accent-foreground: #000d1a;
+  --destructive: #ff3300;
+  --destructive-foreground: #ffffff;
+  --border: #0a3a5c;
+  --input: #071e38;
+  --ring: #00aaff;
+  --chart-1: #00ccff;
+  --chart-2: #00aaff;
+  --chart-3: #0088dd;
+  --chart-4: #0066bb;
+  --chart-5: #004499;
+  --sidebar: #020c1b;
+  --sidebar-foreground: #cce8ff;
+  --sidebar-primary: #00aaff;
+  --sidebar-primary-foreground: #000d1a;
+  --sidebar-accent: #071e38;
+  --sidebar-accent-foreground: #88ccff;
+  --sidebar-border: #0a3a5c;
+  --sidebar-ring: #00aaff;
+  --font-sans: "Share Tech Mono", monospace;
+  --font-serif: "Share Tech Mono", monospace;
+  --font-mono: "Share Tech Mono", monospace;
+  --radius: 0.125rem;
+  --shadow-x: 0;
+  --shadow-y: 0;
+  --shadow-blur: 16px;
+  --shadow-spread: 0px;
+  --shadow-opacity: 0.4;
+  --shadow-color: oklch(0.6 0.25 220);
+  --shadow-2xs: 0 0 8px 0px rgba(0, 170, 255, 0.15);
+  --shadow-xs: 0 0 10px 0px rgba(0, 170, 255, 0.2);
+  --shadow-sm: 0 0 14px 0px rgba(0, 170, 255, 0.3), 0 1px 2px -1px rgba(0, 204, 255, 0.15);
+  --shadow: 0 0 20px 0px rgba(0, 170, 255, 0.35), 0 2px 4px -1px rgba(0, 204, 255, 0.2);
+  --shadow-md: 0 0 28px 0px rgba(0, 170, 255, 0.4), 0 4px 8px -2px rgba(0, 204, 255, 0.25);
+  --shadow-lg: 0 0 40px 0px rgba(0, 170, 255, 0.45), 0 8px 16px -4px rgba(0, 204, 255, 0.3);
+  --shadow-xl: 0 0 56px 0px rgba(0, 170, 255, 0.5), 0 12px 24px -6px rgba(0, 204, 255, 0.35);
+  --shadow-2xl: 0 0 80px 0px rgba(0, 170, 255, 0.6);
 }
 
 @theme inline {
-    --color-background: var(--background);
-    --color-foreground: var(--foreground);
-    --color-card: var(--card);
-    --color-card-foreground: var(--card-foreground);
-    --color-popover: var(--popover);
-    --color-popover-foreground: var(--popover-foreground);
-    --color-primary: var(--primary);
-    --color-primary-foreground: var(--primary-foreground);
-    --color-secondary: var(--secondary);
-    --color-secondary-foreground: var(--secondary-foreground);
-    --color-muted: var(--muted);
-    --color-muted-foreground: var(--muted-foreground);
-    --color-accent: var(--accent);
-    --color-accent-foreground: var(--accent-foreground);
-    --color-destructive: var(--destructive);
-    --color-destructive-foreground: var(--destructive-foreground);
-    --color-border: var(--border);
-    --color-input: var(--input);
-    --color-ring: var(--ring);
-    --color-chart-1: var(--chart-1);
-    --color-chart-2: var(--chart-2);
-    --color-chart-3: var(--chart-3);
-    --color-chart-4: var(--chart-4);
-    --color-chart-5: var(--chart-5);
-    --color-sidebar: var(--sidebar);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-ring: var(--sidebar-ring);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 
-    --font-sans: var(--font-sans);
-    --font-mono: var(--font-mono);
-    --font-serif: var(--font-serif);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-serif: var(--font-serif);
 
-    --radius-sm: calc(var(--radius) - 2px);
-    --radius-md: var(--radius);
-    --radius-lg: calc(var(--radius) + 2px);
-    --radius-xl: calc(var(--radius) + 6px);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 6px);
 
-    --shadow-2xs: var(--shadow-2xs);
-    --shadow-xs: var(--shadow-xs);
-    --shadow-sm: var(--shadow-sm);
-    --shadow: var(--shadow);
-    --shadow-md: var(--shadow-md);
-    --shadow-lg: var(--shadow-lg);
-    --shadow-xl: var(--shadow-xl);
-    --shadow-2xl: var(--shadow-2xl);
+  --shadow-2xs: var(--shadow-2xs);
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow: var(--shadow);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+  --shadow-2xl: var(--shadow-2xl);
 }
 
 /* ── Psycho-Pass Global Styles ── */
 
 * {
-    letter-spacing: var(--tracking-normal);
+  letter-spacing: var(--tracking-normal);
 }
 
 body {
-    background-color: var(--background);
-    color: var(--foreground);
-    font-family: var(--font-sans);
-    /* Subtle scanline texture */
-    background-image: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0, 153, 255, 0.015) 2px,
-        rgba(0, 153, 255, 0.015) 4px
-    );
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  /* Subtle scanline texture */
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 153, 255, 0.015) 2px,
+    rgba(0, 153, 255, 0.015) 4px
+  );
 }
 
 .dark body {
-    background-image: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0, 170, 255, 0.025) 2px,
-        rgba(0, 170, 255, 0.025) 4px
-    );
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 170, 255, 0.025) 2px,
+    rgba(0, 170, 255, 0.025) 4px
+  );
 }
 
 /* Geometric corner accent on cards */
 .card-psycho {
-    position: relative;
+  position: relative;
 }
 
 .card-psycho::before,
 .card-psycho::after {
-    content: '';
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    border-color: var(--accent);
-    border-style: solid;
-    opacity: 0.7;
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: var(--accent);
+  border-style: solid;
+  opacity: 0.7;
 }
 
 .card-psycho::before {
-    top: -1px;
-    left: -1px;
-    border-width: 2px 0 0 2px;
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
 }
 
 .card-psycho::after {
-    bottom: -1px;
-    right: -1px;
-    border-width: 0 2px 2px 0;
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 2px 2px 0;
 }
 
 /* Glowing border utility */
 .glow-border {
-    border: 1px solid var(--border);
-    box-shadow: 0 0 0 1px rgba(0, 153, 255, 0.1), inset 0 0 20px rgba(0, 153, 255, 0.03);
+  border: 1px solid var(--border);
+  box-shadow:
+    0 0 0 1px rgba(0, 153, 255, 0.1),
+    inset 0 0 20px rgba(0, 153, 255, 0.03);
 }
 
 .dark .glow-border {
-    box-shadow: 0 0 0 1px rgba(0, 170, 255, 0.15), inset 0 0 20px rgba(0, 170, 255, 0.05);
+  box-shadow:
+    0 0 0 1px rgba(0, 170, 255, 0.15),
+    inset 0 0 20px rgba(0, 170, 255, 0.05);
 }
 
 /* Header scanline bar */
 header {
-    background: var(--card);
-    border-bottom: 1px solid var(--border);
-    box-shadow: 0 1px 0 rgba(0, 153, 255, 0.2), 0 4px 20px rgba(0, 153, 255, 0.08);
-    position: relative;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  box-shadow:
+    0 1px 0 rgba(0, 153, 255, 0.2),
+    0 4px 20px rgba(0, 153, 255, 0.08);
+  position: relative;
 }
 
 header::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
-    opacity: 0.5;
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.5;
 }
 
 .dark header {
-    box-shadow: 0 1px 0 rgba(0, 170, 255, 0.3), 0 4px 24px rgba(0, 170, 255, 0.12);
+  box-shadow:
+    0 1px 0 rgba(0, 170, 255, 0.3),
+    0 4px 24px rgba(0, 170, 255, 0.12);
 }
 
 /* Button glow on hover */
 button[class*="bg-primary"]:hover,
 button[data-variant="default"]:hover {
-    box-shadow: 0 0 16px rgba(0, 153, 255, 0.5);
+  box-shadow: 0 0 16px rgba(0, 153, 255, 0.5);
 }
 
 /* Input focus glow */
 input:focus,
 textarea:focus {
-    box-shadow: 0 0 0 2px rgba(0, 153, 255, 0.2), 0 0 12px rgba(0, 153, 255, 0.15);
+  box-shadow:
+    0 0 0 2px rgba(0, 153, 255, 0.2),
+    0 0 12px rgba(0, 153, 255, 0.15);
 }
 
 .dark input:focus,
 .dark textarea:focus {
-    box-shadow: 0 0 0 2px rgba(0, 170, 255, 0.3), 0 0 16px rgba(0, 170, 255, 0.2);
+  box-shadow:
+    0 0 0 2px rgba(0, 170, 255, 0.3),
+    0 0 16px rgba(0, 170, 255, 0.2);
 }
 
 /* Psycho-Pass style heading accent */
-h1, h2, h3 {
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 h1 {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--background);
+  background: var(--background);
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 0;
+  background: var(--border);
+  border-radius: 0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--primary);
-    box-shadow: 0 0 8px var(--primary);
+  background: var(--primary);
+  box-shadow: 0 0 8px var(--primary);
 }
 
 /* Selection color */
 ::selection {
-    background: rgba(0, 153, 255, 0.3);
-    color: var(--foreground);
+  background: rgba(0, 153, 255, 0.3);
+  color: var(--foreground);
 }
 
 .dark ::selection {
-    background: rgba(0, 170, 255, 0.35);
+  background: rgba(0, 170, 255, 0.35);
 }

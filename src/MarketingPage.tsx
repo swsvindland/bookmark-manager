@@ -1,12 +1,20 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Bookmark, FolderOpen, UserCircle, Zap } from "lucide-react";
+import { SignInForm } from "./SignInForm";
 
-interface MarketingPageProps {
-  onLoginClick: () => void;
-}
+export function MarketingPage() {
+  const [showLogin, setShowLogin] = useState(false);
+  const onLoginClick = () => setShowLogin(true);
 
-export function MarketingPage({ onLoginClick }: MarketingPageProps) {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -47,7 +55,7 @@ export function MarketingPage({ onLoginClick }: MarketingPageProps) {
               <p className="text-muted-foreground">Stop losing tabs and start saving ideas.</p>
             </div>
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-              <Card className="card-psycho border-border">
+              <Card className="card-psycho">
                 <CardHeader>
                   <FolderOpen className="mb-2 h-10 w-10 text-primary" />
                   <CardTitle>Folders</CardTitle>
@@ -57,7 +65,7 @@ export function MarketingPage({ onLoginClick }: MarketingPageProps) {
                 </CardHeader>
               </Card>
 
-              <Card className="card-psycho border-border">
+              <Card className="card-psycho">
                 <CardHeader>
                   <UserCircle className="mb-2 h-10 w-10 text-primary" />
                   <CardTitle>Profiles</CardTitle>
@@ -67,7 +75,7 @@ export function MarketingPage({ onLoginClick }: MarketingPageProps) {
                 </CardHeader>
               </Card>
 
-              <Card className="card-psycho border-border">
+              <Card className="card-psycho">
                 <CardHeader>
                   <Zap className="mb-2 h-10 w-10 text-primary" />
                   <CardTitle>Lightning Fast</CardTitle>
@@ -78,7 +86,7 @@ export function MarketingPage({ onLoginClick }: MarketingPageProps) {
                 </CardHeader>
               </Card>
 
-              <Card className="card-psycho border-border">
+              <Card className="card-psycho">
                 <CardHeader>
                   <Bookmark className="mb-2 h-10 w-10 text-primary" />
                   <CardTitle>Quick Preview</CardTitle>
@@ -96,7 +104,7 @@ export function MarketingPage({ onLoginClick }: MarketingPageProps) {
           <div className="container mx-auto px-4 sm:px-8 text-center">
             <h2 className="mb-12 text-3xl font-bold sm:text-4xl">Simple Pricing</h2>
             <div className="mx-auto max-w-sm">
-              <Card className="card-psycho border-primary">
+              <Card className="card-psycho ring-primary">
                 <CardHeader>
                   <CardTitle className="text-2xl font-bold">Free</CardTitle>
                   <CardDescription>Perfect for personal use</CardDescription>
@@ -126,6 +134,20 @@ export function MarketingPage({ onLoginClick }: MarketingPageProps) {
           </div>
         </section>
       </main>
+
+      <Dialog open={showLogin} onOpenChange={setShowLogin}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="space-y-1 text-center sm:text-center">
+            <DialogTitle className="text-3xl font-bold tracking-widest">
+              Bookmark Manager
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground text-xs uppercase tracking-wider">
+              Enter your credentials to access your bookmarks
+            </DialogDescription>
+          </DialogHeader>
+          <SignInForm />
+        </DialogContent>
+      </Dialog>
 
       <footer className="border-t py-12">
         <div className="container mx-auto px-4 sm:px-8 text-center">

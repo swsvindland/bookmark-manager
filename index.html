@@ -3,6 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      // Set the theme class before first paint so dark-mode users don't get a flash of the light theme
+      (() => {
+        const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
+        const applyTheme = () =>
+          document.documentElement.classList.toggle("dark", darkQuery.matches);
+        applyTheme();
+        darkQuery.addEventListener("change", applyTheme);
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "convex/react";
+import { toast } from "sonner";
 import { api } from "../convex/_generated/api";
 import { Id } from "../convex/_generated/dataModel";
 import {
@@ -21,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { MoreVertical, PlusCircle, Trash2, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ConfirmDialog } from "./ConfirmDialog";
 
 interface Profile {
   _id: Id<"profiles">;
@@ -54,6 +56,9 @@ export function ProfileSelector({
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newProfileName, setNewProfileName] = useState("");
   const [selectedColor, setSelectedColor] = useState(PROFILE_COLORS[0]);
+  // Kept after the dialog closes so its title doesn't change during the exit animation
+  const [profileToDelete, setProfileToDelete] = useState<Profile | null>(null);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   const createProfile = useMutation(api.profiles.create);
   const setDefaultProfile = useMutation(api.profiles.setDefault);
@@ -74,6 +79,7 @@ export function ProfileSelector({
       setShowCreateForm(false);
     } catch (error) {
       console.error("Failed to create profile:", error);
+      toast.error("Couldn't create the profile");
     }
   };
 
@@ -82,27 +88,31 @@ export function ProfileSelector({
       await setDefaultProfile({ profileId });
     } catch (error) {
       console.error("Failed to set default profile:", error);
+      toast.error("Couldn't change the default profile");
     }
   };
 
-  const handleRemoveProfile = async (profileId: Id<"profiles">) => {
+  const confirmRemoveProfile = (profileId: Id<"profiles">) => {
     if (profiles.length <= 1) {
-      alert("Cannot delete the last profile");
+      toast.error("You can't delete your only profile");
       return;
     }
+    setProfileToDelete(profiles.find((p) => p._id === profileId) ?? null);
+    setIsConfirmingDelete(true);
+  };
 
-    if (confirm("Are you sure? This will delete all bookmarks in this profile.")) {
-      try {
-        await removeProfile({ profileId });
-        if (selectedProfileId === profileId) {
-          const remainingProfile = profiles.find((p) => p._id !== profileId);
-          if (remainingProfile) {
-            onProfileSelect(remainingProfile._id);
-          }
+  const handleRemoveProfile = async (profileId: Id<"profiles">) => {
+    try {
+      await removeProfile({ profileId });
+      if (selectedProfileId === profileId) {
+        const remainingProfile = profiles.find((p) => p._id !== profileId);
+        if (remainingProfile) {
+          onProfileSelect(remainingProfile._id);
         }
-      } catch (error) {
-        console.error("Failed to remove profile:", error);
       }
+    } catch (error) {
+      console.error("Failed to remove profile:", error);
+      toast.error("Couldn't delete the profile");
     }
   };
 
@@ -118,9 +128,9 @@ export function ProfileSelector({
   }
 
   return (
-    <div className="flex items-center gap-2">
-      {/* Profile Tabs */}
-      <div className="flex max-w-md gap-1 overflow-x-auto pb-1 sm:max-w-xl">
+    <div className="flex min-w-0 items-center gap-2">
+      {/* Profile Tabs (scroll sideways when there are more than fit) */}
+      <div className="flex min-w-0 gap-1 overflow-x-auto pb-1 pointer-coarse:[scrollbar-width:none]">
         {profiles.map((profile) => (
           <Button
             key={profile._id}
@@ -128,7 +138,7 @@ export function ProfileSelector({
             size="sm"
             onClick={() => onProfileSelect(profile._id)}
             className={cn(
-              "flex h-9 items-center gap-2 px-3",
+              "flex h-9 flex-shrink-0 items-center gap-2 px-3",
               selectedProfileId === profile._id && "bg-background border shadow-sm",
             )}
           >
@@ -166,7 +176,7 @@ export function ProfileSelector({
                 <span>Set as Default</span>
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => handleRemoveProfile(selectedProfileId)}
+                onClick={() => confirmRemoveProfile(selectedProfileId)}
                 className="text-destructive focus:text-destructive"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
@@ -176,6 +186,15 @@ export function ProfileSelector({
           )}
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <ConfirmDialog
+        open={isConfirmingDelete && profileToDelete !== null}
+        onOpenChange={setIsConfirmingDelete}
+        title={`Delete "${profileToDelete?.name}"?`}
+        description="This permanently deletes the profile and every bookmark in it."
+        confirmLabel="Delete profile"
+        onConfirm={() => handleRemoveProfile(profileToDelete!._id)}
+      />
 
       {/* Create Profile Form Dialog */}
       <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>

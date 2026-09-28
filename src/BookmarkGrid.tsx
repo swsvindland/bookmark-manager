@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { useMutation } from "convex/react";
+import { toast } from "sonner";
 import { api } from "../convex/_generated/api";
 import { Id } from "../convex/_generated/dataModel";
 import { EditBookmarkModal } from "./EditBookmarkModal";
 import { FolderCard } from "./FolderCard";
+import { Favicon } from "./Favicon";
+import { getDisplayTitle, getDomain } from "@/lib/bookmarks";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -23,6 +26,7 @@ import {
   ExternalLink,
   FolderInput,
   FolderMinus,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -55,22 +59,63 @@ interface BookmarkGridProps {
   bookmarks: Bookmark[];
   folders: Folder[];
   profileId: Id<"profiles">;
+  // null shows the top level: folders plus bookmarks that aren't in one
+  currentFolderId: Id<"folders"> | null;
+  onOpenFolder: (folderId: Id<"folders">) => void;
+  onAddBookmark: () => void;
 }
 
-export function BookmarkGrid({ bookmarks, folders, profileId }: BookmarkGridProps) {
+export function BookmarkGrid({
+  bookmarks,
+  folders,
+  profileId,
+  currentFolderId,
+  onOpenFolder,
+  onAddBookmark,
+}: BookmarkGridProps) {
   const [editingBookmark, setEditingBookmark] = useState<Bookmark | null>(null);
 
+  const createBookmark = useMutation(api.bookmarks.create);
   const removeBookmark = useMutation(api.bookmarks.remove);
   const updateBookmark = useMutation(api.bookmarks.update);
 
-  const handleRemoveBookmark = async (bookmarkId: Id<"bookmarks">) => {
-    if (confirm("Are you sure you want to remove this bookmark?")) {
-      try {
-        await removeBookmark({ bookmarkId });
-      } catch (error) {
-        console.error("Failed to remove bookmark:", error);
-      }
+  const copyLink = (url: string) => {
+    navigator.clipboard.writeText(url).then(
+      () => toast.success("Link copied"),
+      () => toast.error("Couldn't copy the link"),
+    );
+  };
+
+  const restoreBookmark = async (bookmark: Bookmark) => {
+    try {
+      await createBookmark({
+        url: bookmark.url,
+        title: bookmark.title,
+        description: bookmark.description,
+        favicon: bookmark.favicon,
+        profileId,
+        // Skip the folder if it was deleted in the meantime
+        folderId: folders.some((f) => f._id === bookmark.folderId) ? bookmark.folderId : undefined,
+        addedAt: bookmark.addedAt,
+      });
+    } catch (error) {
+      console.error("Failed to restore bookmark:", error);
+      toast.error("Couldn't restore the bookmark");
     }
+  };
+
+  // Deletes right away and offers Undo, instead of asking for confirmation first
+  const handleRemoveBookmark = async (bookmark: Bookmark) => {
+    try {
+      await removeBookmark({ bookmarkId: bookmark._id });
+    } catch (error) {
+      console.error("Failed to remove bookmark:", error);
+      toast.error("Couldn't delete the bookmark");
+      return;
+    }
+    toast("Bookmark deleted", {
+      action: { label: "Undo", onClick: () => void restoreBookmark(bookmark) },
+    });
   };
 
   const handleMoveToFolder = async (
@@ -79,37 +124,20 @@ export function BookmarkGrid({ bookmarks, folders, profileId }: BookmarkGridProp
   ) => {
     try {
       await updateBookmark({ bookmarkId, folderId: folderId ?? null });
+      // The card usually disappears from the current view, so say where it went
+      const folderName = folders.find((f) => f._id === folderId)?.name;
+      toast.success(folderName ? `Moved to ${folderName}` : "Removed from folder");
     } catch (error) {
       console.error("Failed to move bookmark:", error);
+      toast.error("Couldn't move the bookmark");
     }
   };
 
-  const getFaviconUrl = (bookmark: Bookmark) => {
-    if (bookmark.favicon) return bookmark.favicon;
-    try {
-      const url = new URL(bookmark.url);
-      return `${url.protocol}//${url.host}/favicon.ico`;
-    } catch {
-      return null;
-    }
-  };
+  const visibleBookmarks = bookmarks.filter((b) =>
+    currentFolderId ? b.folderId === currentFolderId : !b.folderId,
+  );
 
-  const getDomain = (url: string) => {
-    try {
-      return new URL(url).hostname.replace("www.", "");
-    } catch {
-      return url;
-    }
-  };
-
-  // Split bookmarks into foldered and unfoldered
-  const folderedBookmarks = bookmarks.filter((b) => b.folderId);
-  const unfolderedBookmarks = bookmarks.filter((b) => !b.folderId);
-
-  const bookmarksByFolder = (folderId: Id<"folders">) =>
-    folderedBookmarks.filter((b) => b.folderId === folderId);
-
-  if (bookmarks.length === 0 && folders.length === 0) {
+  if (!currentFolderId && bookmarks.length === 0 && folders.length === 0) {
     return (
       <div className="py-12 text-center">
         <div className="text-muted-foreground mb-4">
@@ -123,7 +151,11 @@ export function BookmarkGrid({ bookmarks, folders, profileId }: BookmarkGridProp
           </svg>
         </div>
         <h3 className="mb-2 text-lg font-semibold">No bookmarks yet</h3>
-        <p className="text-muted-foreground">Add your first bookmark to get started</p>
+        <p className="text-muted-foreground mb-6">Add your first bookmark to get started</p>
+        <Button onClick={onAddBookmark}>
+          <Plus className="h-4 w-4" />
+          Add bookmark
+        </Button>
       </div>
     );
   }
@@ -131,7 +163,7 @@ export function BookmarkGrid({ bookmarks, folders, profileId }: BookmarkGridProp
   const renderBookmarkCard = (bookmark: Bookmark) => (
     <ContextMenu key={bookmark._id}>
       <ContextMenuTrigger asChild>
-        <Card className="card-psycho group hover:border-primary/50 relative h-full overflow-hidden transition-all duration-200 hover:shadow-md">
+        <Card className="card-psycho group hover:ring-primary/50 relative h-full overflow-hidden transition-all duration-200 hover:shadow-md">
           <a
             href={bookmark.url}
             target="_blank"
@@ -139,30 +171,17 @@ export function BookmarkGrid({ bookmarks, folders, profileId }: BookmarkGridProp
             className="block h-full p-4"
           >
             <div className="mb-3 flex items-start gap-3">
-              <div className="bg-muted flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-none border border-border">
-                {getFaviconUrl(bookmark) ? (
-                  <img
-                    src={getFaviconUrl(bookmark)!}
-                    alt=""
-                    className="h-6 w-6"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = "none";
-                      target.nextElementSibling?.classList.remove("hidden");
-                    }}
-                  />
-                ) : null}
-                <div
-                  className={`bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded text-xs font-medium ${getFaviconUrl(bookmark) ? "hidden" : ""}`}
-                >
-                  {bookmark.title.charAt(0).toUpperCase()}
-                </div>
+              <div className="bg-muted flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-none border">
+                <Favicon bookmark={bookmark} className="h-6 w-6 text-xs" />
               </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="line-clamp-2 text-sm leading-tight font-semibold">
-                  {bookmark.title}
+              <div className="min-w-0 flex-1 pointer-coarse:pr-8">
+                {/* wrap-anywhere lets long URL-like titles break instead of overflowing */}
+                <h3 className="line-clamp-2 text-sm leading-tight font-semibold tracking-normal wrap-anywhere normal-case">
+                  {getDisplayTitle(bookmark)}
                 </h3>
-                <p className="text-muted-foreground mt-1 text-xs">{getDomain(bookmark.url)}</p>
+                <p className="text-muted-foreground mt-1 truncate text-xs">
+                  {getDomain(bookmark.url)}
+                </p>
               </div>
             </div>
             {bookmark.description && (
@@ -173,12 +192,13 @@ export function BookmarkGrid({ bookmarks, folders, profileId }: BookmarkGridProp
           </a>
 
           {/* Quick Actions */}
-          <div className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
+          <div className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 has-[[data-state=open]]:opacity-100 pointer-coarse:opacity-100">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
+                  aria-label="Bookmark actions"
                   className="bg-background/80 h-8 w-8 border shadow-sm backdrop-blur-sm"
                 >
                   <MoreVertical className="h-4 w-4" />
@@ -189,7 +209,7 @@ export function BookmarkGrid({ bookmarks, folders, profileId }: BookmarkGridProp
                   <Pencil className="mr-2 h-4 w-4" />
                   <span>Edit</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigator.clipboard.writeText(bookmark.url)}>
+                <DropdownMenuItem onClick={() => copyLink(bookmark.url)}>
                   <Copy className="mr-2 h-4 w-4" />
                   <span>Copy URL</span>
                 </DropdownMenuItem>
@@ -239,7 +259,7 @@ export function BookmarkGrid({ bookmarks, folders, profileId }: BookmarkGridProp
                 )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  onClick={() => handleRemoveBookmark(bookmark._id)}
+                  onClick={() => handleRemoveBookmark(bookmark)}
                   className="text-destructive focus:text-destructive"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
@@ -255,7 +275,7 @@ export function BookmarkGrid({ bookmarks, folders, profileId }: BookmarkGridProp
           <Pencil className="mr-2 h-4 w-4" />
           <span>Edit</span>
         </ContextMenuItem>
-        <ContextMenuItem onClick={() => navigator.clipboard.writeText(bookmark.url)}>
+        <ContextMenuItem onClick={() => copyLink(bookmark.url)}>
           <Copy className="mr-2 h-4 w-4" />
           <span>Copy URL</span>
         </ContextMenuItem>
@@ -303,7 +323,7 @@ export function BookmarkGrid({ bookmarks, folders, profileId }: BookmarkGridProp
         )}
         <ContextMenuSeparator />
         <ContextMenuItem
-          onClick={() => handleRemoveBookmark(bookmark._id)}
+          onClick={() => handleRemoveBookmark(bookmark)}
           className="text-destructive focus:text-destructive"
         >
           <Trash2 className="mr-2 h-4 w-4" />
@@ -315,21 +335,29 @@ export function BookmarkGrid({ bookmarks, folders, profileId }: BookmarkGridProp
 
   return (
     <>
-      <div className="grid grid-flow-row-dense grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {/* Folder cards first */}
-        {folders.map((folder) => (
-          <FolderCard
-            key={folder._id}
-            folderId={folder._id}
-            name={folder.name}
-            bookmarks={bookmarksByFolder(folder._id)}
-            profileId={profileId}
-            onRemoveBookmark={(bookmarkId) => handleMoveToFolder(bookmarkId, null)}
-          />
-        ))}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        {/* Folders only exist at the top level */}
+        {!currentFolderId &&
+          folders.map((folder) => (
+            <FolderCard
+              key={folder._id}
+              folderId={folder._id}
+              name={folder.name}
+              bookmarks={bookmarks.filter((b) => b.folderId === folder._id)}
+              onOpen={() => onOpenFolder(folder._id)}
+            />
+          ))}
 
-        {/* Unfoldered bookmarks */}
-        {unfolderedBookmarks.map((bookmark) => renderBookmarkCard(bookmark))}
+        {visibleBookmarks.map((bookmark) => renderBookmarkCard(bookmark))}
+
+        <button
+          type="button"
+          onClick={onAddBookmark}
+          className="text-muted-foreground hover:text-foreground hover:border-primary/50 flex min-h-32 items-center justify-center gap-2 rounded-md border border-dashed text-sm transition-colors"
+        >
+          <Plus className="h-4 w-4" />
+          Add bookmark
+        </button>
       </div>
 
       {editingBookmark && (

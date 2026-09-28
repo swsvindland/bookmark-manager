@@ -74,6 +74,8 @@ export const create = mutation({
     favicon: v.optional(v.string()),
     profileId: v.id("profiles"),
     folderId: v.optional(v.id("folders")),
+    // Set when undoing a delete, so the bookmark returns to its original position
+    addedAt: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -94,7 +96,7 @@ export const create = mutation({
       favicon: args.favicon,
       profileId: args.profileId,
       userId,
-      addedAt: Date.now(),
+      addedAt: args.addedAt ?? Date.now(),
       folderId: args.folderId,
     });
   },

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -172,6 +173,14 @@
 @layer base {
   * {
     letter-spacing: var(--tracking-normal);
+  }
+
+  /* Tailwind v4 borders default to currentColor (bright text color); use the theme's border color */
+  *,
+  ::before,
+  ::after,
+  ::backdrop {
+    border-color: var(--border);
   }
 
   body {

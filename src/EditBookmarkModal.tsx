@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "convex/react";
+import { toast } from "sonner";
 import { api } from "../convex/_generated/api";
 import { Id } from "../convex/_generated/dataModel";
 import {
@@ -13,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { getDomain } from "@/lib/bookmarks";
 
 interface Bookmark {
   _id: Id<"bookmarks">;
@@ -50,17 +52,9 @@ export function EditBookmarkModal({ bookmark, onClose }: EditBookmarkModalProps)
       onClose();
     } catch (error) {
       console.error("Failed to update bookmark:", error);
-      alert("Failed to update bookmark. Please try again.");
+      toast.error("Couldn't save your changes. Try again.");
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const getDomain = (url: string) => {
-    try {
-      return new URL(url).hostname.replace("www.", "");
-    } catch {
-      return url;
     }
   };
 

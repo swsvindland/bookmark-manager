@@ -44,7 +44,8 @@ export function EditBookmarkModal({ bookmark, onClose }: EditBookmarkModalProps)
       await updateBookmark({
         bookmarkId: bookmark._id,
         title: title.trim(),
-        description: description.trim() || undefined,
+        // Send "" rather than undefined so clearing the field actually clears it
+        description: description.trim(),
       });
       onClose();
     } catch (error) {

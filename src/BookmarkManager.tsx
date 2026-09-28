@@ -20,60 +20,45 @@ import { Label } from "@/components/ui/label";
 import { FolderPlus } from "lucide-react";
 
 export function BookmarkManager() {
-  const profiles = useQuery(api.profiles.list) || [];
-  const defaultProfile = useQuery(api.profiles.getDefault);
+  // Queries return undefined while loading; keep that distinct from "empty"
+  const profiles = useQuery(api.profiles.list);
   const [selectedProfileId, setSelectedProfileId] = useState<Id<"profiles"> | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showAddFolder, setShowAddFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [setupFailed, setSetupFailed] = useState(false);
 
   const ensureDefaultProfile = useMutation(api.profiles.ensureDefaultProfile);
   const createFolder = useMutation(api.folders.create);
 
-  // Initialize user with default profile if needed
+  // Only brand-new users (loaded, but zero profiles) need a default profile created
   useEffect(() => {
-    if (!isInitialized && profiles !== undefined) {
-      const initializeUser = async () => {
-        try {
-          await ensureDefaultProfile();
-          setIsInitialized(true);
-        } catch (error) {
-          console.error("Failed to initialize user:", error);
-          setIsInitialized(true);
-        }
-      };
-
-      if (profiles.length === 0) {
-        initializeUser();
-      } else {
-        setIsInitialized(true);
-      }
+    if (profiles?.length === 0 && !setupFailed) {
+      ensureDefaultProfile().catch((error) => {
+        console.error("Failed to initialize user:", error);
+        setSetupFailed(true);
+      });
     }
-  }, [profiles, isInitialized, ensureDefaultProfile]);
+  }, [profiles, setupFailed, ensureDefaultProfile]);
 
-  // Set default profile when it loads
-  useEffect(() => {
-    if (defaultProfile && !selectedProfileId && isInitialized) {
-      setSelectedProfileId(defaultProfile._id);
-    }
-  }, [defaultProfile, selectedProfileId, isInitialized]);
+  // Fall back to the default profile (or the first one) until the user picks one, or if the
+  // picked profile disappears
+  const selectedProfile =
+    profiles?.find((p) => p._id === selectedProfileId) ??
+    profiles?.find((p) => p.isDefault) ??
+    profiles?.[0];
+  const profileId = selectedProfile?._id ?? null;
 
-  const bookmarks =
-    useQuery(api.bookmarks.list, selectedProfileId ? { profileId: selectedProfileId } : "skip") ||
-    [];
-  const folders =
-    useQuery(api.folders.list, selectedProfileId ? { profileId: selectedProfileId } : "skip") || [];
-
-  const selectedProfile = profiles.find((p) => p._id === selectedProfileId);
+  const bookmarks = useQuery(api.bookmarks.list, profileId ? { profileId } : "skip");
+  const folders = useQuery(api.folders.list, profileId ? { profileId } : "skip");
 
   const handleCreateFolder = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newFolderName.trim() || !selectedProfileId) return;
+    if (!newFolderName.trim() || !profileId) return;
     setIsCreatingFolder(true);
     try {
-      await createFolder({ name: newFolderName.trim(), profileId: selectedProfileId });
+      await createFolder({ name: newFolderName.trim(), profileId });
       setNewFolderName("");
       setShowAddFolder(false);
     } catch (error) {
@@ -83,7 +68,7 @@ export function BookmarkManager() {
     }
   };
 
-  if (!isInitialized) {
+  if (profiles === undefined || (profiles.length === 0 && !setupFailed)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
@@ -103,7 +88,7 @@ export function BookmarkManager() {
               <h1 className="text-2xl font-bold tracking-widest">Bookmarks</h1>
               <ProfileSelector
                 profiles={profiles}
-                selectedProfileId={selectedProfileId}
+                selectedProfileId={profileId}
                 onProfileSelect={setSelectedProfileId}
               />
             </div>
@@ -111,12 +96,12 @@ export function BookmarkManager() {
               <Button
                 variant="outline"
                 onClick={() => setShowAddFolder(true)}
-                disabled={!selectedProfileId}
+                disabled={!profileId}
               >
                 <FolderPlus className="mr-2 h-4 w-4" />
                 New Folder
               </Button>
-              <Button onClick={() => setShowAddForm(true)} disabled={!selectedProfileId}>
+              <Button onClick={() => setShowAddForm(true)} disabled={!profileId}>
                 Add Bookmark
               </Button>
               <SignOutButton />
@@ -137,26 +122,40 @@ export function BookmarkManager() {
                 }}
               />
               <h2 className="text-xl font-semibold tracking-widest">{selectedProfile.name}</h2>
-              <span className="text-muted-foreground text-sm">
-                {bookmarks.length} bookmark{bookmarks.length !== 1 ? "s" : ""}
-                {folders.length > 0 &&
-                  `, ${folders.length} folder${folders.length !== 1 ? "s" : ""}`}
-              </span>
+              {bookmarks && folders && (
+                <span className="text-muted-foreground text-sm">
+                  {bookmarks.length} bookmark{bookmarks.length !== 1 ? "s" : ""}
+                  {folders.length > 0 &&
+                    `, ${folders.length} folder${folders.length !== 1 ? "s" : ""}`}
+                </span>
+              )}
             </div>
           </div>
         )}
 
-        {selectedProfileId ? (
-          <BookmarkGrid bookmarks={bookmarks} folders={folders} profileId={selectedProfileId} />
-        ) : (
+        {!profileId ? (
           <div className="py-12 text-center">
             <p className="text-muted-foreground">Select a profile to view bookmarks</p>
           </div>
+        ) : bookmarks === undefined || folders === undefined ? (
+          <div
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+            aria-busy="true"
+          >
+            {Array.from({ length: 5 }, (_, i) => (
+              <div
+                key={i}
+                className="bg-card ring-foreground/10 h-32 animate-pulse rounded-xl ring-1"
+              />
+            ))}
+          </div>
+        ) : (
+          <BookmarkGrid bookmarks={bookmarks} folders={folders} profileId={profileId} />
         )}
       </main>
 
-      {showAddForm && selectedProfileId && (
-        <AddBookmarkForm profileId={selectedProfileId} onClose={() => setShowAddForm(false)} />
+      {showAddForm && profileId && (
+        <AddBookmarkForm profileId={profileId} onClose={() => setShowAddForm(false)} />
       )}
 
       {showAddFolder && (

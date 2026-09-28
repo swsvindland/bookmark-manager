@@ -31,6 +31,7 @@ import {
   Plus,
 } from "lucide-react";
 import { AddBookmarkForm } from "./AddBookmarkForm";
+import { cn } from "@/lib/utils";
 
 interface Bookmark {
   _id: Id<"bookmarks">;
@@ -147,7 +148,10 @@ export function FolderCard({
       <ContextMenu>
         <ContextMenuTrigger asChild>
           <Card
-            className={`card-psycho group hover:border-primary/50 relative overflow-hidden transition-all duration-200 hover:shadow-md ${isOpen ? "col-span-full" : ""}`}
+            className={cn(
+              "card-psycho group hover:border-primary/50 relative overflow-hidden transition-all duration-200 hover:shadow-md",
+              isOpen && "ring-primary/60",
+            )}
           >
             {/* Folder header */}
             <div
@@ -185,7 +189,7 @@ export function FolderCard({
                 </form>
               ) : (
                 <div className="min-w-0 flex-1">
-                  <h3 className="truncate text-sm font-medium">{name}</h3>
+                  <h3 className="truncate text-sm font-semibold">{name}</h3>
                   <p className="text-muted-foreground text-xs">
                     {bookmarks.length} bookmark{bookmarks.length !== 1 ? "s" : ""}
                   </p>
@@ -213,109 +217,110 @@ export function FolderCard({
                 </div>
               )}
             </div>
-
-            {/* Expanded bookmarks list */}
-            {isOpen && bookmarks.length > 0 && (
-              <div className="border-t px-4 pb-4">
-                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                  {bookmarks.map((bookmark) => (
-                    <div
-                      key={bookmark._id}
-                      className="bg-muted/30 hover:bg-muted/60 group/item relative flex items-start gap-2 rounded-none border p-3 transition-colors"
-                    >
-                      <a
-                        href={bookmark.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex min-w-0 flex-1 items-start gap-2"
-                      >
-                        <div className="bg-background flex h-6 w-6 flex-shrink-0 items-center justify-center overflow-hidden rounded-none border">
-                          {getFaviconUrl(bookmark) ? (
-                            <img
-                              src={getFaviconUrl(bookmark)!}
-                              alt=""
-                              className="h-4 w-4"
-                              onError={(e) => {
-                                const t = e.target as HTMLImageElement;
-                                t.style.display = "none";
-                                t.nextElementSibling?.classList.remove("hidden");
-                              }}
-                            />
-                          ) : null}
-                          <div
-                            className={`text-primary flex h-4 w-4 items-center justify-center text-xs font-medium ${getFaviconUrl(bookmark) ? "hidden" : ""}`}
-                          >
-                            {bookmark.title.charAt(0).toUpperCase()}
-                          </div>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="line-clamp-1 text-xs font-medium leading-tight">
-                            {bookmark.title}
-                          </p>
-                          <p className="text-muted-foreground text-xs">{getDomain(bookmark.url)}</p>
-                        </div>
-                      </a>
-                      {/* Per-bookmark actions */}
-                      <div className="flex flex-shrink-0 gap-1 opacity-0 transition-opacity group-hover/item:opacity-100">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          title="Copy URL"
-                          onClick={() => navigator.clipboard.writeText(bookmark.url)}
-                        >
-                          <Copy className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          title="Open link"
-                          asChild
-                        >
-                          <a href={bookmark.url} target="_blank" rel="noopener noreferrer">
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive hover:text-destructive h-6 w-6"
-                          title="Remove from folder"
-                          onClick={() => onRemoveBookmark(bookmark._id)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {isOpen && bookmarks.length === 0 && (
-              <div className="border-t px-4 py-6 text-center">
-                <p className="text-muted-foreground text-xs">No bookmarks in this folder yet</p>
-              </div>
-            )}
-
-            {isOpen && (
-              <div className="border-t px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-muted-foreground hover:text-foreground h-7 gap-1.5 text-xs"
-                  onClick={() => setIsAddingBookmark(true)}
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  Add bookmark
-                </Button>
-              </div>
-            )}
           </Card>
         </ContextMenuTrigger>
         <ContextMenuContent className="w-48">{contextMenuItems}</ContextMenuContent>
       </ContextMenu>
+
+      {/* Expanded contents get their own full-width grid item. The parent grid is dense-packed,
+          so this lands on the row below the folder while the folder card itself stays put. */}
+      {isOpen && (
+        <Card className="card-psycho ring-primary/30 col-span-full gap-0 py-0">
+          {bookmarks.length > 0 ? (
+            <div className="p-4">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                {bookmarks.map((bookmark) => (
+                  <div
+                    key={bookmark._id}
+                    className="bg-muted/30 hover:bg-muted/60 group/item relative flex items-start gap-2 rounded-none border p-3 transition-colors"
+                  >
+                    <a
+                      href={bookmark.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex min-w-0 flex-1 items-start gap-2"
+                    >
+                      <div className="bg-background flex h-6 w-6 flex-shrink-0 items-center justify-center overflow-hidden rounded-none border">
+                        {getFaviconUrl(bookmark) ? (
+                          <img
+                            src={getFaviconUrl(bookmark)!}
+                            alt=""
+                            className="h-4 w-4"
+                            onError={(e) => {
+                              const t = e.target as HTMLImageElement;
+                              t.style.display = "none";
+                              t.nextElementSibling?.classList.remove("hidden");
+                            }}
+                          />
+                        ) : null}
+                        <div
+                          className={`text-primary flex h-4 w-4 items-center justify-center text-xs font-medium ${getFaviconUrl(bookmark) ? "hidden" : ""}`}
+                        >
+                          {bookmark.title.charAt(0).toUpperCase()}
+                        </div>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="line-clamp-1 text-xs font-medium leading-tight">
+                          {bookmark.title}
+                        </p>
+                        <p className="text-muted-foreground text-xs">{getDomain(bookmark.url)}</p>
+                      </div>
+                    </a>
+                    {/* Per-bookmark actions */}
+                    <div className="flex flex-shrink-0 gap-1 opacity-0 transition-opacity group-hover/item:opacity-100">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        title="Copy URL"
+                        onClick={() => navigator.clipboard.writeText(bookmark.url)}
+                      >
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        title="Open link"
+                        asChild
+                      >
+                        <a href={bookmark.url} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive hover:text-destructive h-6 w-6"
+                        title="Remove from folder"
+                        onClick={() => onRemoveBookmark(bookmark._id)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="px-4 py-6 text-center">
+              <p className="text-muted-foreground text-xs">No bookmarks in this folder yet</p>
+            </div>
+          )}
+
+          <div className="border-t px-4 py-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground h-7 gap-1.5 text-xs"
+              onClick={() => setIsAddingBookmark(true)}
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add bookmark
+            </Button>
+          </div>
+        </Card>
+      )}
 
       {isAddingBookmark && (
         <AddBookmarkForm

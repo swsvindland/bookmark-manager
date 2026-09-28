@@ -23,7 +23,7 @@ export function MarketingPage({ onLoginClick }: MarketingPageProps) {
         {/* Hero Section */}
         <section className="py-20 sm:py-32">
           <div className="container mx-auto px-4 sm:px-8 text-center">
-            <h1 className="mb-6 text-4xl font-extrabold tracking-tight sm:text-6xl">
+            <h1 className="mb-6 text-4xl font-extrabold sm:text-6xl">
               Organize your digital life <br />
               <span className="text-primary">efficiently.</span>
             </h1>
@@ -43,9 +43,7 @@ export function MarketingPage({ onLoginClick }: MarketingPageProps) {
         <section className="bg-muted/50 py-20">
           <div className="container mx-auto px-4 sm:px-8">
             <div className="mb-16 text-center">
-              <h2 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
-                Everything you need
-              </h2>
+              <h2 className="mb-4 text-3xl font-bold sm:text-4xl">Everything you need</h2>
               <p className="text-muted-foreground">Stop losing tabs and start saving ideas.</p>
             </div>
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
@@ -96,7 +94,7 @@ export function MarketingPage({ onLoginClick }: MarketingPageProps) {
         {/* Pricing Section (Simple Free Tier) */}
         <section className="py-20">
           <div className="container mx-auto px-4 sm:px-8 text-center">
-            <h2 className="mb-12 text-3xl font-bold tracking-tight sm:text-4xl">Simple Pricing</h2>
+            <h2 className="mb-12 text-3xl font-bold sm:text-4xl">Simple Pricing</h2>
             <div className="mx-auto max-w-sm">
               <Card className="card-psycho border-primary">
                 <CardHeader>

@@ -122,7 +122,7 @@ export function BookmarkGrid({ bookmarks, folders, profileId }: BookmarkGridProp
             />
           </svg>
         </div>
-        <h3 className="mb-2 text-lg font-medium">No bookmarks yet</h3>
+        <h3 className="mb-2 text-lg font-semibold">No bookmarks yet</h3>
         <p className="text-muted-foreground">Add your first bookmark to get started</p>
       </div>
     );
@@ -159,7 +159,9 @@ export function BookmarkGrid({ bookmarks, folders, profileId }: BookmarkGridProp
                 </div>
               </div>
               <div className="min-w-0 flex-1">
-                <h3 className="line-clamp-2 text-sm leading-tight font-medium">{bookmark.title}</h3>
+                <h3 className="line-clamp-2 text-sm leading-tight font-semibold">
+                  {bookmark.title}
+                </h3>
                 <p className="text-muted-foreground mt-1 text-xs">{getDomain(bookmark.url)}</p>
               </div>
             </div>
@@ -313,7 +315,7 @@ export function BookmarkGrid({ bookmarks, folders, profileId }: BookmarkGridProp
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <div className="grid grid-flow-row-dense grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {/* Folder cards first */}
         {folders.map((folder) => (
           <FolderCard

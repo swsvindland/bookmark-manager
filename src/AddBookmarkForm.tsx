@@ -21,6 +21,7 @@ interface AddBookmarkFormProps {
 
 export function AddBookmarkForm({ profileId, folderId, onClose }: AddBookmarkFormProps) {
   const [url, setUrl] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const addBookmark = useAction(api.bookmarks.add);
 
@@ -28,13 +29,19 @@ export function AddBookmarkForm({ profileId, folderId, onClose }: AddBookmarkFor
     e.preventDefault();
     if (!url.trim()) return;
 
+    let formattedUrl = url.trim();
+    if (!/^https?:\/\//i.test(formattedUrl)) {
+      formattedUrl = "https://" + formattedUrl;
+    }
+    // Browsers are lenient here (Chrome accepts "https://not a url"), so also check the hostname
+    const hostname = URL.parse(formattedUrl)?.hostname;
+    if (!hostname || !/^[a-z0-9._-]+$/i.test(hostname)) {
+      setError("That doesn't look like a valid URL.");
+      return;
+    }
+
     setIsLoading(true);
     try {
-      let formattedUrl = url.trim();
-      if (!formattedUrl.startsWith("http://") && !formattedUrl.startsWith("https://")) {
-        formattedUrl = "https://" + formattedUrl;
-      }
-
       await addBookmark({
         url: formattedUrl,
         profileId,
@@ -45,7 +52,7 @@ export function AddBookmarkForm({ profileId, folderId, onClose }: AddBookmarkFor
       onClose();
     } catch (error) {
       console.error("Failed to add bookmark:", error);
-      alert("Failed to add bookmark. Please check the URL and try again.");
+      setError("Failed to add bookmark. Please check the URL and try again.");
     } finally {
       setIsLoading(false);
     }
@@ -60,17 +67,30 @@ export function AddBookmarkForm({ profileId, folderId, onClose }: AddBookmarkFor
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="url">Website URL</Label>
+            {/* Plain text rather than type="url", which rejects bare domains like example.com */}
             <Input
               id="url"
-              type="url"
+              type="text"
+              inputMode="url"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               value={url}
-              onChange={(e) => setUrl(e.target.value)}
+              onChange={(e) => {
+                setUrl(e.target.value);
+                setError(null);
+              }}
               placeholder="https://example.com or example.com"
               required
               disabled={isLoading}
+              aria-invalid={error !== null}
+              aria-describedby="url-hint"
             />
-            <p className="text-muted-foreground text-xs">
-              We'll automatically fetch the title, description, and favicon
+            <p
+              id="url-hint"
+              className={error ? "text-destructive text-xs" : "text-muted-foreground text-xs"}
+            >
+              {error ?? "We'll automatically fetch the title, description, and favicon"}
             </p>
           </div>
           <DialogFooter className="gap-2 sm:justify-start">

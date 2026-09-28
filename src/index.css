@@ -167,32 +167,82 @@
 
 /* ── Psycho-Pass Global Styles ── */
 
-* {
-  letter-spacing: var(--tracking-normal);
-}
+/* Element defaults live in the base layer so Tailwind utilities (sticky, tracking-*, font-*)
+   can still override them. Unlayered rules would beat every utility regardless of specificity. */
+@layer base {
+  * {
+    letter-spacing: var(--tracking-normal);
+  }
 
-body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
-  /* Subtle scanline texture */
-  background-image: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0, 153, 255, 0.015) 2px,
-    rgba(0, 153, 255, 0.015) 4px
-  );
-}
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    /* Subtle scanline texture */
+    background-image: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 153, 255, 0.015) 2px,
+      rgba(0, 153, 255, 0.015) 4px
+    );
+  }
 
-.dark body {
-  background-image: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0, 170, 255, 0.025) 2px,
-    rgba(0, 170, 255, 0.025) 4px
-  );
+  .dark body {
+    background-image: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 170, 255, 0.025) 2px,
+      rgba(0, 170, 255, 0.025) 4px
+    );
+  }
+
+  /* Header scanline bar */
+  header {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    box-shadow:
+      0 1px 0 rgba(0, 153, 255, 0.2),
+      0 4px 20px rgba(0, 153, 255, 0.08);
+    position: relative;
+  }
+
+  header::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.5;
+  }
+
+  .dark header {
+    box-shadow:
+      0 1px 0 rgba(0, 170, 255, 0.3),
+      0 4px 24px rgba(0, 170, 255, 0.12);
+  }
+
+  /* Psycho-Pass style heading accent */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 }
 
 /* Geometric corner accent on cards */
@@ -237,32 +287,8 @@ body {
     inset 0 0 20px rgba(0, 170, 255, 0.05);
 }
 
-/* Header scanline bar */
-header {
-  background: var(--card);
-  border-bottom: 1px solid var(--border);
-  box-shadow:
-    0 1px 0 rgba(0, 153, 255, 0.2),
-    0 4px 20px rgba(0, 153, 255, 0.08);
-  position: relative;
-}
-
-header::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  opacity: 0.5;
-}
-
-.dark header {
-  box-shadow:
-    0 1px 0 rgba(0, 170, 255, 0.3),
-    0 4px 24px rgba(0, 170, 255, 0.12);
-}
+/* The glow effects below stay unlayered on purpose: they replace the shadow/ring utilities
+   that the button and input components set. */
 
 /* Button glow on hover */
 button[class*="bg-primary"]:hover,
@@ -283,25 +309,6 @@ textarea:focus {
   box-shadow:
     0 0 0 2px rgba(0, 170, 255, 0.3),
     0 0 16px rgba(0, 170, 255, 0.2);
-}
-
-/* Psycho-Pass style heading accent */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-h1 {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 /* Scrollbar styling */

@@ -3,6 +3,7 @@ import { query, mutation, action } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { api } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
+import { extractMetadata } from "./lib/metadata";
 
 export const list = query({
   args: {
@@ -44,39 +45,11 @@ export const add = action({
       const response = await fetch(args.url);
       const html = await response.text();
 
-      // Extract title
-      const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-      if (titleMatch) {
-        title = titleMatch[1].trim();
-      }
-
-      // Extract description
-      const descMatch = html.match(
-        /<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/i,
-      );
-      if (descMatch) {
-        description = descMatch[1].trim();
-      }
-
-      // Extract favicon
-      const faviconMatch = html.match(
-        /<link[^>]*rel=["'](?:icon|shortcut icon)["'][^>]*href=["']([^"']+)["']/i,
-      );
-      if (faviconMatch) {
-        let faviconUrl = faviconMatch[1];
-        if (faviconUrl.startsWith("/")) {
-          const urlObj = new URL(args.url);
-          faviconUrl = `${urlObj.protocol}//${urlObj.host}${faviconUrl}`;
-        } else if (!faviconUrl.startsWith("http")) {
-          const urlObj = new URL(args.url);
-          faviconUrl = `${urlObj.protocol}//${urlObj.host}/${faviconUrl}`;
-        }
-        favicon = faviconUrl;
-      } else {
-        // Fallback to default favicon location
-        const urlObj = new URL(args.url);
-        favicon = `${urlObj.protocol}//${urlObj.host}/favicon.ico`;
-      }
+      // Resolve relative favicon links against the final URL, after any redirects
+      const metadata = extractMetadata(html, response.url || args.url);
+      title = metadata.title || title;
+      description = metadata.description;
+      favicon = metadata.favicon;
     } catch (error) {
       console.error("Failed to fetch metadata:", error);
       // Use URL as title if metadata fetch fails
@@ -166,7 +139,8 @@ export const update = mutation({
 
     const updates: any = {};
     if (args.title !== undefined) updates.title = args.title;
-    if (args.description !== undefined) updates.description = args.description;
+    // An empty description removes the field (patching a field to undefined deletes it)
+    if (args.description !== undefined) updates.description = args.description || undefined;
     if (args.folderId !== undefined) updates.folderId = args.folderId;
 
     await ctx.db.patch(args.bookmarkId, updates);

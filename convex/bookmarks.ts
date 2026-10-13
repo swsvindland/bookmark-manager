@@ -4,10 +4,12 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { api } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
 import { extractMetadata } from "./lib/metadata";
+import { resolveProfile } from "./lib/profiles";
 
 export const list = query({
   args: {
-    profileId: v.id("profiles"),
+    // Omitted for the user's default profile, so the client needn't wait for the profile list
+    profileId: v.optional(v.id("profiles")),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -15,15 +17,14 @@ export const list = query({
       return [];
     }
 
-    // Verify the profile belongs to the user
-    const profile = await ctx.db.get(args.profileId);
-    if (!profile || profile.userId !== userId) {
+    const profile = await resolveProfile(ctx, userId, args.profileId);
+    if (!profile) {
       return [];
     }
 
     return await ctx.db
       .query("bookmarks")
-      .withIndex("by_profile_added", (q) => q.eq("profileId", args.profileId))
+      .withIndex("by_profile_added", (q) => q.eq("profileId", profile._id))
       .order("desc")
       .collect();
   },

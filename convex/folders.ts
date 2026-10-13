@@ -1,21 +1,23 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { resolveProfile } from "./lib/profiles";
 
 export const list = query({
   args: {
-    profileId: v.id("profiles"),
+    // Omitted for the user's default profile, so the client needn't wait for the profile list
+    profileId: v.optional(v.id("profiles")),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return [];
 
-    const profile = await ctx.db.get(args.profileId);
-    if (!profile || profile.userId !== userId) return [];
+    const profile = await resolveProfile(ctx, userId, args.profileId);
+    if (!profile) return [];
 
     return await ctx.db
       .query("folders")
-      .withIndex("by_profile", (q) => q.eq("profileId", args.profileId))
+      .withIndex("by_profile", (q) => q.eq("profileId", profile._id))
       .order("asc")
       .collect();
   },

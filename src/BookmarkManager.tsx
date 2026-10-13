@@ -70,14 +70,16 @@ export function BookmarkManager() {
 
   // Fall back to the default profile (or the first one) until the user picks one, or if the
   // picked profile disappears
-  const selectedProfile =
-    profiles?.find((p) => p._id === selectedProfileId) ??
-    profiles?.find((p) => p.isDefault) ??
-    profiles?.[0];
+  const defaultProfile = profiles?.find((p) => p.isDefault) ?? profiles?.[0];
+  const selectedProfile = profiles?.find((p) => p._id === selectedProfileId) ?? defaultProfile;
   const profileId = selectedProfile?._id ?? null;
 
-  const bookmarks = useQuery(api.bookmarks.list, profileId ? { profileId } : "skip");
-  const folders = useQuery(api.folders.list, profileId ? { profileId } : "skip");
+  // The server resolves the default profile itself, so on page load bookmarks and folders are
+  // fetched alongside the profile list instead of waiting for it
+  const listArgs =
+    selectedProfile && selectedProfile !== defaultProfile ? { profileId: selectedProfile._id } : {};
+  const bookmarks = useQuery(api.bookmarks.list, listArgs);
+  const folders = useQuery(api.folders.list, listArgs);
   // Undefined if the folder was deleted or belongs to another profile; shows the top level
   const currentFolder = folderId ? folders?.find((f) => f._id === folderId) : undefined;
   const currentFolderBookmarks = currentFolder

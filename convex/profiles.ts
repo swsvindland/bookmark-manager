@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { resolveProfile } from "./lib/profiles";
 
 export const list = query({
   args: {},
@@ -25,20 +26,7 @@ export const getDefault = query({
       return null;
     }
 
-    const defaultProfile = await ctx.db
-      .query("profiles")
-      .withIndex("by_user_default", (q) => q.eq("userId", userId).eq("isDefault", true))
-      .first();
-
-    if (defaultProfile) {
-      return defaultProfile;
-    }
-
-    // If no default profile exists, return the first profile
-    return await ctx.db
-      .query("profiles")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .first();
+    return await resolveProfile(ctx, userId);
   },
 });
 

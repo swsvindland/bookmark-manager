@@ -5,9 +5,20 @@ import { LoadingScreen } from "./LoadingScreen";
 
 // Split by route: signed-in users never download the marketing page, and visitors never
 // download the bookmark manager (menus, dialogs, icons)
+const loadBookmarkManager = () => import("./BookmarkManager");
 const BookmarkManager = lazy(() =>
-  import("./BookmarkManager").then((m) => ({ default: m.BookmarkManager })),
+  loadBookmarkManager().then((m) => ({ default: m.BookmarkManager })),
 );
+
+// Returning users: download the bookmark manager during the auth handshake, not after it
+function hasStoredSession() {
+  try {
+    return Object.keys(localStorage).some((key) => key.startsWith("__convexAuthRefreshToken_"));
+  } catch {
+    return false;
+  }
+}
+if (hasStoredSession()) loadBookmarkManager().catch(() => {});
 const MarketingPage = lazy(() =>
   import("./MarketingPage").then((m) => ({ default: m.MarketingPage })),
 );

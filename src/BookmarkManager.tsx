@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useMutation } from "convex/react";
 import { toast } from "sonner";
 import { api } from "../convex/_generated/api";
 import { SignOutButton } from "./SignOutButton";
@@ -7,6 +7,7 @@ import { ProfileSelector } from "./ProfileSelector";
 import { BookmarkGrid } from "./BookmarkGrid";
 import { AddBookmarkForm } from "./AddBookmarkForm";
 import { Id } from "../convex/_generated/dataModel";
+import { useCachedQuery } from "@/lib/queryCache";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,8 +22,13 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, ChevronRight, FolderPlus, Plus } from "lucide-react";
 
 export function BookmarkManager() {
-  // Queries return undefined while loading; keep that distinct from "empty"
-  const profiles = useQuery(api.profiles.list);
+  // Queries return undefined while loading; keep that distinct from "empty". Until the session
+  // is restored these show what was cached last visit
+  const { data: profiles, isLive: profilesLive } = useCachedQuery(
+    api.profiles.list,
+    {},
+    "profiles",
+  );
   const [selectedProfileId, setSelectedProfileId] = useState<Id<"profiles"> | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showAddFolder, setShowAddFolder] = useState(false);
@@ -39,13 +45,13 @@ export function BookmarkManager() {
 
   // Only brand-new users (loaded, but zero profiles) need a default profile created
   useEffect(() => {
-    if (profiles?.length === 0 && !setupFailed) {
+    if (profilesLive && profiles?.length === 0 && !setupFailed) {
       ensureDefaultProfile().catch((error) => {
         console.error("Failed to initialize user:", error);
         setSetupFailed(true);
       });
     }
-  }, [profiles, setupFailed, ensureDefaultProfile]);
+  }, [profiles, profilesLive, setupFailed, ensureDefaultProfile]);
 
   useEffect(() => {
     const onPopState = (e: PopStateEvent) => setFolderId(e.state?.folderId ?? null);
@@ -78,8 +84,16 @@ export function BookmarkManager() {
   // fetched alongside the profile list instead of waiting for it
   const listArgs =
     selectedProfile && selectedProfile !== defaultProfile ? { profileId: selectedProfile._id } : {};
-  const bookmarks = useQuery(api.bookmarks.list, listArgs);
-  const folders = useQuery(api.folders.list, listArgs);
+  const { data: bookmarks } = useCachedQuery(
+    api.bookmarks.list,
+    listArgs,
+    profileId && `bookmarks:${profileId}`,
+  );
+  const { data: folders } = useCachedQuery(
+    api.folders.list,
+    listArgs,
+    profileId && `folders:${profileId}`,
+  );
   // Undefined if the folder was deleted or belongs to another profile; shows the top level
   const currentFolder = folderId ? folders?.find((f) => f._id === folderId) : undefined;
   const currentFolderBookmarks = currentFolder

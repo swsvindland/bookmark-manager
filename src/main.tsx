@@ -7,6 +7,16 @@ import "./index.css";
 import App from "./App";
 import { Analytics } from "@vercel/analytics/react";
 
+// Caches the app so later visits open without waiting on the network. Registered after load so
+// precaching doesn't compete with this visit's own requests
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch((error) => {
+      console.error("Service worker registration failed:", error);
+    });
+  });
+}
+
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
 createRoot(document.getElementById("root")!).render(

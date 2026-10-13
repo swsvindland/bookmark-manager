@@ -1,7 +1,8 @@
-import { Authenticated, Unauthenticated } from "convex/react";
-import { lazy, Suspense } from "react";
+import { useConvexAuth } from "convex/react";
+import { lazy, Suspense, useEffect } from "react";
 import { Toaster } from "sonner";
 import { LoadingScreen } from "./LoadingScreen";
+import { clearQueryCache } from "@/lib/queryCache";
 
 // Split by route: signed-in users never download the marketing page, and visitors never
 // download the bookmark manager (menus, dialogs, icons)
@@ -24,15 +25,19 @@ const MarketingPage = lazy(() =>
 );
 
 export default function App() {
+  const { isLoading, isAuthenticated } = useConvexAuth();
+  // Returning users get their bookmarks (from the last visit's cache) while the session is still
+  // being restored, rather than a blank page until it is
+  const showBookmarks = isAuthenticated || (isLoading && hasStoredSession());
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) clearQueryCache();
+  }, [isLoading, isAuthenticated]);
+
   return (
     <div className="min-h-screen bg-background">
       <Suspense fallback={<LoadingScreen />}>
-        <Authenticated>
-          <BookmarkManager />
-        </Authenticated>
-        <Unauthenticated>
-          <MarketingPage />
-        </Unauthenticated>
+        {showBookmarks ? <BookmarkManager /> : !isLoading && <MarketingPage />}
       </Suspense>
       <Toaster
         theme="system"
